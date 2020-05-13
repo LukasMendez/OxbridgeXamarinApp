@@ -15,6 +15,7 @@ namespace OxbridgeApp
 
             DependencyService.Register<MockDataStore>();
             MainPage = new RaceView();
+            // THIS IS A TEST
         }
 
         protected override void OnStart()
