@@ -16,6 +16,8 @@ namespace OxbridgeApp.Services
 
         Task NavigateToAsync<TViewModel>(object parameter) where TViewModel : BaseViewModel;
 
+        Task NavigateToAsyncWithBack<TViewModel>() where TViewModel : BaseViewModel;
+
         Task NavigateToAsync(Type viewModelType);
 
         Task RemoveLastFromBackStackAsync();

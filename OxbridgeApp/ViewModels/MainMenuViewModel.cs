@@ -13,7 +13,7 @@ namespace OxbridgeApp.ViewModels
             this.SpectateCommand = new Command(
                 async (object message) =>
                 {
-                    await NavigationService.NavigateToAsync<RaceViewModel>();
+                    await NavigationService.NavigateToAsyncWithBack<RaceViewModel>();
                     Console.WriteLine("*Spectate*");
                 },
                 (object message) => { Console.WriteLine("*CanSpectate*"); return true; });
