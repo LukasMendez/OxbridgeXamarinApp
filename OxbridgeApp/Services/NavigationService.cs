@@ -93,7 +93,6 @@ namespace OxbridgeApp.Services
             //Use Master detail navigation instead
             var mpage = Application.Current.MainPage as MasterDetailPage;
             mpage.Detail = new NavigationPage(page);
-            
 
             /*
             if (page is TestView) //avoid back buttons
@@ -122,6 +121,18 @@ namespace OxbridgeApp.Services
             }*/
 
             await (page.BindingContext as BaseViewModel).InitializeAsync(parameter);//error why
+        }
+
+        public Task NavigateToAsyncWithBack<TViewModel>() where TViewModel : BaseViewModel {
+            return InternalNavigateToAsyncWithBack(typeof(TViewModel), null);
+        }
+
+        private async Task InternalNavigateToAsyncWithBack(Type viewModelType, object parameter) {
+            Page page = CreatePage(viewModelType, parameter);
+            var mainPage = Application.Current.MainPage as MasterDetailPage;
+            if (mainPage != null) {
+                await mainPage.Detail.Navigation.PushAsync(page);
+            }
         }
 
         private Type GetPageTypeForViewModel(Type viewModelType) {
