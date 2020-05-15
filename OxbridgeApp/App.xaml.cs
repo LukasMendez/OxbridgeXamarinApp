@@ -1,33 +1,56 @@
 ﻿using System;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+using System.Threading.Tasks;
+using OxbridgeApp.ViewModels;
 using OxbridgeApp.Services;
-using OxbridgeApp.Views;
 
+[assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 namespace OxbridgeApp
 {
     public partial class App : Application
     {
-
-        public App()
-        {
+        ISettingsService _settingsService;
+        public App() {
             InitializeComponent();
 
-            DependencyService.Register<MockDataStore>();
-            MainPage = new RaceView();
-            // THIS IS A TEST
+
+            
+            ServiceContainer.Register<ISettingsService>(() => new SettingService());
+            _settingsService = ServiceContainer.Resolve<ISettingsService>();
+            ServiceContainer.Register<INavigationService>(() => new NavigationService(_settingsService));
+
+            ServiceContainer.Register<MainMenuViewModel>(() => new MainMenuViewModel());
+            ServiceContainer.Register<LoginViewModel>(() => new LoginViewModel());
+            ServiceContainer.Register<RaceViewModel>(() => new RaceViewModel());
+
+            var masterDetailViewModel = new MasterDetailViewModel();
+            ServiceContainer.Register<MasterDetailViewModel>(() => masterDetailViewModel);
+
+            //MainPage = new MainPage();
+            var master = new Views.MasterDetail();
+            MainPage = master;
+            master.BindingContext = masterDetailViewModel;
         }
 
-        protected override void OnStart()
-        {
+        private Task InitNavigation() {
+            var navigationService = ServiceContainer.Resolve<INavigationService>();
+            return navigationService.InitializeAsync();
         }
 
-        protected override void OnSleep()
-        {
+        protected async override void OnStart() {
+            // Handle when your app starts
+            base.OnStart();
+            await InitNavigation();
+            base.OnResume();
         }
 
-        protected override void OnResume()
-        {
+        protected override void OnSleep() {
+            // Handle when your app sleeps
+        }
+
+        protected override void OnResume() {
+            // Handle when your app resumes
         }
     }
 }
