@@ -10,6 +10,16 @@ namespace OxbridgeApp
 {
     public partial class App : Application
     {
+        private static WebConnection webConnection;
+        public static WebConnection WebConnection {
+            get {
+                if (webConnection == null) {
+                    webConnection = new WebConnection();
+                }
+                return webConnection;
+            }
+        }
+
         ISettingsService _settingsService;
         public App() {
             InitializeComponent();
