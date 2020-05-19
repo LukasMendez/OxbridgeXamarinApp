@@ -23,11 +23,11 @@
                                         </Grid.RowDefinitions>
                                         <Label Grid.Column="1" Grid.Row="0" Text="{Binding Text}" TextColor="DarkBlue"/>
                                         <Label Grid.Column="1" Grid.Row="1" Text="{Binding Detail}" TextColor="DarkBlue"/>
-                                        <Image Grid.Column="0" Grid.Row="0" Grid.RowSpan="2" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand">
+                                        <!--<Image Grid.Column="0" Grid.Row="0" Grid.RowSpan="2" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand">
                                             <Image.Source>
                                                 <OnPlatform x:TypeArguments="BindingBase" Android="{Binding ImagePath}"/>
                                             </Image.Source>
-                                        </Image>
+                                        </Image>-->
                                     </Grid>
                                 </ViewCell>
                             </DataTemplate>
