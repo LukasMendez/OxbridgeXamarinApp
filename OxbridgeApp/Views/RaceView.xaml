@@ -7,6 +7,29 @@
     xmlns:baseViewModel="clr-namespace:OxbridgeApp.ViewModels;assembly=OxbridgeApp"
     baseViewModel:ViewModelLocator.AutoWireViewModel="true">
     <ContentPage.Content>
-        <maps:Map WidthRequest="420" HeightRequest="300" x:Name="MyMap" IsShowingUser="False" MapType="Hybrid"/>
+        <AbsoluteLayout>
+            
+            <ContentView  Content="{Binding Map}" AbsoluteLayout.LayoutBounds="1,1,1,1" AbsoluteLayout.LayoutFlags="All"/>
+            
+            <Grid  AbsoluteLayout.LayoutBounds="0,1,.4,.27" AbsoluteLayout.LayoutFlags="All"  >
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Button Command="{Binding NorthCommand}" Text="N" Grid.Row="0" Grid.Column="1" TextColor="Black"/>
+                <Button Command="{Binding SouthCommand}" Text="S" Grid.Row="2" Grid.Column="1" TextColor="Black"/>
+                <Button Command="{Binding EastCommand}" Text="E" Grid.Row="1" Grid.Column="2" TextColor="Black"/>
+                <Button Command="{Binding WestCommand}" Text="W" Grid.Row="1" Grid.Column="0" TextColor="Black"/>
+            </Grid>
+
+        </AbsoluteLayout>
+        <!--<maps:Map x:Name="RaceMap" WidthRequest="420" HeightRequest="300" IsShowingUser="False" MapType="Hybrid"/>-->
     </ContentPage.Content>
 </ContentPage>

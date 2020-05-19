@@ -54,7 +54,12 @@ namespace OxbridgeApp.Views
             return list;
         }
 
+
+
         private void OnMenuItemSelected(object sender, SelectedItemChangedEventArgs e) {
+
+            string[] test = new string[5];
+            
             var selectedMenuItem = (MasterMenuItems)e.SelectedItem;
 
             var viewModel = (ViewModels.MasterDetailViewModel)this.BindingContext;
