@@ -33,7 +33,7 @@ namespace OxbridgeApp.ViewModels
 
 
         public RaceViewModel() {
-            UserName = "LukasOtherPhone";
+            UserName = "Robert";
             Participants = new Dictionary<string, Position>();
             App.WebConnection.NewCoordReceived += ReceivedCoord;
             App.WebConnection.ConnectSocket();
@@ -129,30 +129,33 @@ namespace OxbridgeApp.ViewModels
             
             App.WebConnection.SendCoordinate(new Coordinate(UserName, new Position(Latitude,Longitude)));
 
-            Dictionary<string, Position> copy = new Dictionary<string, Position>(Participants); //need to use a copy because changes during iteration will cause exception
-
-            Map.Pins.Clear();
-            foreach (var item in copy) {
-                if (!item.Key.Equals(UserName)) { //if opponent
-                    Pin opponentPin = new Pin
-                    {
-                        Label = item.Key,
-                        Type = PinType.Place,
-                        Position = item.Value,
-                        Transparency = 0.5f,
-                        Icon = boatPin
-                    };
-                    Map.Pins.Add(opponentPin);
-                } else {
-                    MyPosPin = new Pin
-                    {
-                        Label = item.Key,
-                        Type = PinType.Place,
-                        Position = item.Value,
-                        Icon = boatPin
-                    };
-                    Map.Pins.Add(MyPosPin);
+            try {
+                Map.Pins.Clear();
+                foreach (var item in Participants) {
+                    if (!item.Key.Equals(UserName)) { //if opponent
+                        Pin opponentPin = new Pin
+                        {
+                            Label = item.Key,
+                            Type = PinType.Place,
+                            Position = item.Value,
+                            Transparency = 0.5f,
+                            Icon = boatPin
+                        };
+                        Map.Pins.Add(opponentPin);
+                    } else {
+                        MyPosPin = new Pin
+                        {
+                            Label = item.Key,
+                            Type = PinType.Place,
+                            Position = item.Value,
+                            Icon = boatPin
+                        };
+                        Map.Pins.Add(MyPosPin);
+                    }
                 }
+            }
+            catch (Exception ex) { //sometimes catching a "Collection was modified; enumeration operation may not execute." exception
+                Console.WriteLine("*** " + ex.Message);
             }
         }
 
