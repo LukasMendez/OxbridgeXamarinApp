@@ -5,6 +5,10 @@ using System.Text;
 using Xamarin.Forms;
 using System.Linq;
 using Xamarin.Forms.GoogleMaps;
+using Newtonsoft.Json;
+using OxbridgeApp.Models;
+using System.Threading;
+using System.Diagnostics;
 
 namespace OxbridgeApp.ViewModels
 {
@@ -16,18 +20,25 @@ namespace OxbridgeApp.ViewModels
         public Position MyPosition { get; set; }
         private Pin MyPosPin { get; set; }
         private List<Circle> CheckPoints { get; set; }
+        private Dictionary<string, Position> Participants { get; set; }
         private int NextCheckPoint { get; set; }
+        private string UserName { get; set; }
         public Command NorthCommand { get; set; }
         public Command SouthCommand { get; set; }
         public Command EastCommand { get; set; }
         public Command WestCommand { get; set; }
 
         public RaceViewModel() {
+            UserName = "Robert";
+            Participants = new Dictionary<string, Position>();
+            App.WebConnection.NewCoordReceived += ReceivedCoord;
+            App.WebConnection.ConnectSocket();
+
+
             this.NorthCommand = new Command(
                 (object message) =>
                 {
                     Latitude += 0.0002;
-                    MoveMyPosPin();
                     UpdateCheckPoints();
                     Console.WriteLine("*North*");
                 },
@@ -36,7 +47,6 @@ namespace OxbridgeApp.ViewModels
                 (object message) =>
                 {
                     Latitude -= 0.0002;
-                    MoveMyPosPin();
                     UpdateCheckPoints();
                     Console.WriteLine("*South*");
                 },
@@ -44,8 +54,7 @@ namespace OxbridgeApp.ViewModels
             this.EastCommand = new Command(
                 (object message) =>
                 {
-                    Longitude += 0.0002;
-                    MoveMyPosPin();
+                   Longitude += 0.0002;
                     UpdateCheckPoints();
                     Console.WriteLine("*East*");
                 },
@@ -54,7 +63,6 @@ namespace OxbridgeApp.ViewModels
                 (object message) =>
                 {
                     Longitude -= 0.0002;
-                    MoveMyPosPin();
                     UpdateCheckPoints();
                     Console.WriteLine("*West*");
                 },
@@ -70,12 +78,22 @@ namespace OxbridgeApp.ViewModels
             CheckPoints = new List<Circle>();
             NextCheckPoint = 1;
 
+
+
             //move to position (should probably move to the first checkpoint when entering map)
             Map.MoveToRegion(
                 MapSpan.FromCenterAndRadius(
                 MyPosition, Distance.FromKilometers(1)));
 
-            MoveMyPosPin();
+            MyPosPin = new Pin
+            {
+                Label = "Robert",
+                Type = PinType.Place,
+                Position = new Position(Latitude, Longitude)
+            };
+            Map.Pins.Add(MyPosPin);
+
+            StartCoordinateTimer();
             LoadCheckPoints();
             UpdateCheckPoints();
 
@@ -83,17 +101,52 @@ namespace OxbridgeApp.ViewModels
 
         }
 
-        private void MoveMyPosPin() {
-            //pin position HARDCODED TEMPORARY! (should get from device GPS)
-            MyPosPin = new Pin
+        public void StartCoordinateTimer() {
+            Device.StartTimer(new TimeSpan(0, 0, 1), () =>
             {
-                Label = "Me",
-                Address = "My Boat",
-                Type = PinType.Place,
-                Position = new Position(Latitude,Longitude)
-            };
+                UpdateAllPins();
+                return true;
+            });
+        }
+
+        public void UpdateAllPins() {
+            //pin position HARDCODED TEMPORARY! (should get from device GPS)
+            //MyPosPin = new Pin
+            //{
+            //    Label = "Me",
+            //    Address = "My Boat",
+            //    Type = PinType.Place,
+            //    Position = new Position(Latitude, Longitude),
+            //    //Transparency = 0.7f
+            //};
+            //Map.Pins.Clear();
+            //Map.Pins.Add(MyPosPin);
+            
+            App.WebConnection.SendCoordinate(new Coordinate(UserName, new Position(Latitude,Longitude)));
+
+            Dictionary<string, Position> copy = new Dictionary<string, Position>(Participants); //need to use a copy because changes during iteration will cause exception
+
             Map.Pins.Clear();
-            Map.Pins.Add(MyPosPin);
+            foreach (var item in copy) {
+                if (!item.Key.Equals(UserName)) { //if opponent
+                    Pin opponentPin = new Pin
+                    {
+                        Label = item.Key,
+                        Type = PinType.Place,
+                        Position = item.Value,
+                        Transparency = 0.5f
+                    };
+                    Map.Pins.Add(opponentPin);
+                } else {
+                    MyPosPin = new Pin
+                    {
+                        Label = item.Key,
+                        Type = PinType.Place,
+                        Position = item.Value,
+                    };
+                    Map.Pins.Add(MyPosPin);
+                }
+            }
         }
 
         private void LoadCheckPoints() {
@@ -172,9 +225,18 @@ namespace OxbridgeApp.ViewModels
                         }
                     }
                 }
-                
-                
             }
+        }
+
+        /// <summary>
+        /// fired by event every time any client emits its coordinate
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="message"></param>
+        private void ReceivedCoord(object obj, string message) {
+            Coordinate coordinate = JsonConvert.DeserializeObject<Coordinate>(message);
+            Participants[coordinate.UserName] = coordinate.Position;
+            //Opponents.Add(coordinate.UserName, coordinate.Position); //adding or updating this opponent
         }
 
         //private async void currentButton_Clicked(object sender, EventArgs e) {

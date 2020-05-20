@@ -12,7 +12,7 @@ namespace OxbridgeApp.Services
 {
     public delegate void MessageReceivedHandler(object sender, string message);
 
-    public delegate void ConnectionHandler(object sender);
+    //public delegate void ConnectionHandler(object sender);
 
     public class WebConnection
     {
@@ -20,8 +20,10 @@ namespace OxbridgeApp.Services
 
         public Socket socket { get; set; }
 
-        public event MessageReceivedHandler NewMessageReceived;
-        public event ConnectionHandler ConnectedEvent;
+        //public event MessageReceivedHandler NewMessageReceived;
+        //public event ConnectionHandler ConnectedEvent;
+
+        public event MessageReceivedHandler NewCoordReceived;
 
         public WebConnection()
         {
@@ -31,30 +33,54 @@ namespace OxbridgeApp.Services
         }
 
 
-        public void ConnectAndTest()
-        {
+        //public void ConnectAndTest()
+        //{
+        //    socket = IO.Socket(Constants.HostName);
+        //    socket.On(Socket.EVENT_CONNECT, () =>
+        //    {
+        //        Connected = true;
+        //        ConnectedEvent?.Invoke(null);
+        //        //    socket.Emit("hi");
+        //        socket.On("hi", (data) =>
+        //        {
+        //            Console.WriteLine("Received from server: " + data);
+        //            NewMessageReceived?.Invoke(null, data.ToString());
+        //        });
+        //    });
+        //}
+        //public void SendMessage(string message) {
+        //    socket.Emit("hi", message);
+
+        //}
+
+        /// <summary>
+        /// used for sending/receiving coordinates
+        /// </summary>
+        public void ConnectSocket() {
             socket = IO.Socket(Constants.HostName);
             socket.On(Socket.EVENT_CONNECT, () =>
             {
                 Connected = true;
-                ConnectedEvent?.Invoke(null);
-                //    socket.Emit("hi");
-                socket.On("hi", (data) =>
+                socket.On("coord", (data) =>
                 {
                     Console.WriteLine("Received from server: " + data);
-                    NewMessageReceived?.Invoke(null, data.ToString());
+                    NewCoordReceived?.Invoke(null, data.ToString());
                 });
-
             });
-
-
         }
 
-        public void SendMessage(string message)
-        {
-            socket.Emit("hi", message);
 
+
+        /// <summary>
+        /// used for sending this users coordinates to all other clients
+        /// </summary>
+        /// <param name="coordinate"></param>
+        public void SendCoordinate(Coordinate coordinate) {
+            string jsonCoordinate = JsonConvert.SerializeObject(coordinate);
+            socket.Emit("coord", jsonCoordinate);
         }
+
+        
 
         public static async Task<ObservableCollection<Race>> GetRaces()
         {

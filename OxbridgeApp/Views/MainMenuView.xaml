@@ -13,11 +13,11 @@
             <Switch/>
             <Button Text="Spectate" Command="{Binding SpectateCommand}"/>
             <!--Test Area-->
-            <Label Text="{Binding InfoMessage}"/>
+            <!--<Label Text="{Binding InfoMessage}"/>
             <Button Text="Connect" Command="{Binding ConnectCommand}"/>
             <Entry Text="{Binding MyMessageText}" Placeholder="Insert Message To Send"/>
             <Button Text="Send" Command="{Binding SendCommand}"/>
-            <Entry Text="{Binding ReceivedText}" Placeholder="Recieved Message"/>
+            <Entry Text="{Binding ReceivedText}" Placeholder="Recieved Message"/>-->
             <!--Test Area-->
         </StackLayout>
     </ContentPage.Content>
