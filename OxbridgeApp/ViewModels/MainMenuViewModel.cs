@@ -15,41 +15,41 @@ namespace OxbridgeApp.ViewModels
         #region remove this
         // TEST AREA 
 
-        public Command SendCommand { get; set; }
-        public Command ConnectCommand { get; set; }
+        //public Command SendCommand { get; set; }
+        //public Command ConnectCommand { get; set; }
 
 
-        private string infoMessage = "Not connected";
-        public string InfoMessage
-        {
-            get { return infoMessage; }
-            set { infoMessage = value; this.OnPropertyChanged(); }
-        }
+        //private string infoMessage = "Not connected";
+        //public string InfoMessage
+        //{
+        //    get { return infoMessage; }
+        //    set { infoMessage = value; this.OnPropertyChanged(); }
+        //}
 
 
-        private string myMessageText;
-        public string MyMessageText
-        {
-            get { return myMessageText; }
-            set { myMessageText = value; this.OnPropertyChanged(); }
-        }
+        //private string myMessageText;
+        //public string MyMessageText
+        //{
+        //    get { return myMessageText; }
+        //    set { myMessageText = value; this.OnPropertyChanged(); }
+        //}
 
-        private string receivedText;
-        public string ReceivedText
-        {
-            get { return receivedText; }
-            set { receivedText = value; this.OnPropertyChanged(); }
-        }
+        //private string receivedText;
+        //public string ReceivedText
+        //{
+        //    get { return receivedText; }
+        //    set { receivedText = value; this.OnPropertyChanged(); }
+        //}
 
-        private void ReceivedMessageTestMethod(object obj, string message)
-        {
-            this.ReceivedText = message;
-        }
+        //private void ReceivedMessageTestMethod(object obj, string message)
+        //{
+        //    this.ReceivedText = message;
+        //}
 
-        private void Connected(object obj)
-        {
-            this.InfoMessage = "Connected successfully";
-        }
+        //private void Connected(object obj)
+        //{
+        //    this.InfoMessage = "Connected successfully";
+        //}
 
 
         #endregion
@@ -58,19 +58,19 @@ namespace OxbridgeApp.ViewModels
 
             #region remove this
             // TEST AREA
-            App.WebConnection.NewMessageReceived += ReceivedMessageTestMethod;
-            App.WebConnection.ConnectedEvent += Connected;
+            //App.WebConnection.NewMessageReceived += ReceivedMessageTestMethod;
+            //App.WebConnection.ConnectedEvent += Connected;
 
 
-            SendCommand = new Command(() =>
-            {
-                App.WebConnection.SendMessage(MyMessageText);
-            });
+            //SendCommand = new Command(() =>
+            //{
+            //    App.WebConnection.SendMessage(MyMessageText);
+            //});
 
-            ConnectCommand = new Command(() =>
-            {
-                App.WebConnection.ConnectAndTest();
-            });
+            //ConnectCommand = new Command(() =>
+            //{
+            //    App.WebConnection.ConnectAndTest();
+            //});
 
 
             #endregion
