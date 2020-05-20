@@ -28,8 +28,12 @@ namespace OxbridgeApp.ViewModels
         public Command EastCommand { get; set; }
         public Command WestCommand { get; set; }
 
+        // Boat image
+        private BitmapDescriptor boatPin = BitmapDescriptorFactory.FromBundle("boatSmall.png");
+
+
         public RaceViewModel() {
-            UserName = "Robert";
+            UserName = "LukasOtherPhone";
             Participants = new Dictionary<string, Position>();
             App.WebConnection.NewCoordReceived += ReceivedCoord;
             App.WebConnection.ConnectSocket();
@@ -89,7 +93,8 @@ namespace OxbridgeApp.ViewModels
             {
                 Label = "Robert",
                 Type = PinType.Place,
-                Position = new Position(Latitude, Longitude)
+                Position = new Position(Latitude, Longitude),
+                Icon = boatPin
             };
             Map.Pins.Add(MyPosPin);
 
@@ -134,7 +139,8 @@ namespace OxbridgeApp.ViewModels
                         Label = item.Key,
                         Type = PinType.Place,
                         Position = item.Value,
-                        Transparency = 0.5f
+                        Transparency = 0.5f,
+                        Icon = boatPin
                     };
                     Map.Pins.Add(opponentPin);
                 } else {
@@ -143,6 +149,7 @@ namespace OxbridgeApp.ViewModels
                         Label = item.Key,
                         Type = PinType.Place,
                         Position = item.Value,
+                        Icon = boatPin
                     };
                     Map.Pins.Add(MyPosPin);
                 }
