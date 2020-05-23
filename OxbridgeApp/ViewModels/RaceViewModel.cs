@@ -9,6 +9,8 @@ using Newtonsoft.Json;
 using OxbridgeApp.Models;
 using System.Threading;
 using System.Diagnostics;
+using System.Threading.Tasks;
+using System.Runtime.ExceptionServices;
 
 namespace OxbridgeApp.ViewModels
 {
@@ -109,24 +111,30 @@ namespace OxbridgeApp.ViewModels
         public void StartCoordinateTimer() {
             Device.StartTimer(new TimeSpan(0, 0, 1), () =>
             {
+                //UpdatePositionFromGPS(); //comment out when testing
                 UpdateAllPins();
                 return true;
             });
         }
 
+        bool first = true;
+        private async void UpdatePositionFromGPS() {
+            var request = new Xamarin.Essentials.GeolocationRequest(Xamarin.Essentials.GeolocationAccuracy.Medium);
+            var location = await Xamarin.Essentials.Geolocation.GetLocationAsync(request);
+
+            Latitude = location.Latitude;
+            Longitude = location.Longitude;
+
+            if (first) {
+                Position currentPosition = new Position(location.Latitude, location.Longitude);
+                Map.MoveToRegion(
+                    MapSpan.FromCenterAndRadius(
+                    currentPosition, Distance.FromKilometers(1)));
+                first = false;
+            }
+        }
+
         public void UpdateAllPins() {
-            //pin position HARDCODED TEMPORARY! (should get from device GPS)
-            //MyPosPin = new Pin
-            //{
-            //    Label = "Me",
-            //    Address = "My Boat",
-            //    Type = PinType.Place,
-            //    Position = new Position(Latitude, Longitude),
-            //    //Transparency = 0.7f
-            //};
-            //Map.Pins.Clear();
-            //Map.Pins.Add(MyPosPin);
-            
             App.WebConnection.SendCoordinate(new Coordinate(UserName, new Position(Latitude,Longitude)));
 
             try {
@@ -224,10 +232,10 @@ namespace OxbridgeApp.ViewModels
                     item.StrokeColor = Color.FromRgba(51, 61, 255, 88); //blue
                     item.FillColor = Color.FromRgba(51, 61, 255, 50);
                     if (!item.Tag.Equals("done")) {
-                        if (item.Center.Latitude - MyPosPin.Position.Latitude >= -0.0005 &&
-                        item.Center.Latitude - MyPosPin.Position.Latitude <= 0.0005 &&
-                        item.Center.Longitude - MyPosPin.Position.Longitude >= -0.0005 &&
-                        item.Center.Longitude - MyPosPin.Position.Longitude <= 0.0005) {
+                        if (item.Center.Latitude - MyPosPin.Position.Latitude >= -0.0006 &&
+                        item.Center.Latitude - MyPosPin.Position.Latitude <= 0.0006 &&
+                        item.Center.Longitude - MyPosPin.Position.Longitude >= -0.0006 &&
+                        item.Center.Longitude - MyPosPin.Position.Longitude <= 0.0006) {
                             item.StrokeColor = Color.FromRgba(71, 255, 51, 88); //green
                             item.FillColor = Color.FromRgba(71, 255, 51, 50);
                             item.Tag = "done";
@@ -245,29 +253,7 @@ namespace OxbridgeApp.ViewModels
         /// <param name="message"></param>
         private void ReceivedCoord(object obj, string message) {
             Coordinate coordinate = JsonConvert.DeserializeObject<Coordinate>(message);
-            Participants[coordinate.UserName] = coordinate.Position;
-            //Opponents.Add(coordinate.UserName, coordinate.Position); //adding or updating this opponent
+            Participants[coordinate.UserName] = coordinate.Position; //adding or updating this opponent
         }
-
-        //private async void currentButton_Clicked(object sender, EventArgs e) {
-        //    var request = new GeolocationRequest(GeolocationAccuracy.Medium);
-        //    var location = await Geolocation.GetLocationAsync(request);
-
-        //    Position currentPosition = new Position(location.Latitude, location.Longitude);
-        //    MyMap.MoveToRegion(
-        //        MapSpan.FromCenterAndRadius(
-        //        currentPosition, Distance.FromKilometers(1)));
-
-        //    Pin pin = new Pin
-        //    {
-        //        Label = "Home",
-        //        Address = "The city with a boardwalk",
-        //        Type = PinType.Place,
-        //        Position = currentPosition
-        //    };
-
-        //    MyMap.Pins.Add(pin);
-        //}
-
     }
 }
