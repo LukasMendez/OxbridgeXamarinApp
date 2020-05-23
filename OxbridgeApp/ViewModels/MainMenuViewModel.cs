@@ -4,13 +4,17 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Input;
 using Xamarin.Forms;
 
 namespace OxbridgeApp.ViewModels
 {
-    public class MainMenuViewModel : BaseViewModel
-    {
+    public class MainMenuViewModel : BaseViewModel {
         public Command SpectateCommand { get; set; }
+        public ICommand ItemSelectedCommand { get; set; }
+        public ObservableCollection<Race> RaceList { get; set; }
+
 
         #region remove this
         // TEST AREA 
@@ -55,6 +59,7 @@ namespace OxbridgeApp.ViewModels
         #endregion
 
         public MainMenuViewModel() {
+            RaceList = new ObservableCollection<Race>();
 
             #region remove this
             // TEST AREA
@@ -83,12 +88,27 @@ namespace OxbridgeApp.ViewModels
                 },
                 (object message) => { Console.WriteLine("*CanSpectate*"); return true; });
 
-            GetRaces();
+            ItemSelectedCommand = new Command<Race>(OutputRace);
+
+            UpdateRaceList();
+            Console.WriteLine();
+
         }
 
-        private async void GetRaces() {
-            ObservableCollection<Race> races = await WebConnection.GetRaces();
-            Console.WriteLine();
+        void OutputRace(Race race) {
+            Console.WriteLine("selectedItem: " + race.StartTime + " " + race.LocationDescription);
+        }
+
+        private async void UpdateRaceList() {
+            ObservableCollection<Race> temp;
+            temp = await GetRaces();
+            foreach (var item in temp) {
+                RaceList.Add(item);
+            }
+        }
+
+        private async Task<ObservableCollection<Race>> GetRaces() {
+            return await WebConnection.GetRaces();
         }
     }
 }

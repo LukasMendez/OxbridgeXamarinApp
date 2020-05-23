@@ -165,6 +165,7 @@ namespace OxbridgeApp.ViewModels
             catch (Exception ex) { //sometimes catching a "Collection was modified; enumeration operation may not execute." exception
                 Console.WriteLine("*** " + ex.Message);
             }
+
         }
 
         private void LoadCheckPoints() {
