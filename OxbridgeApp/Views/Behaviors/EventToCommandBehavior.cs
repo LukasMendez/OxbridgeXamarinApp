@@ -5,7 +5,7 @@ using Xamarin.Forms;
 
 namespace OxbridgeApp.Views.Behaviors
 {
-	public class EventToCommandBehavior : BehaviorBase<View>
+	public class EventToCommandBehavior : BehaviorBase<VisualElement>
 	{
 		Delegate eventHandler;
 
@@ -34,14 +34,26 @@ namespace OxbridgeApp.Views.Behaviors
 			set { SetValue(InputConverterProperty, value); }
 		}
 
-		protected override void OnAttachedTo(View bindable) {
+		protected override void OnAttachedTo(VisualElement bindable) { 
 			base.OnAttachedTo(bindable);
 			RegisterEvent(EventName);
 		}
 
-		protected override void OnDetachingFrom(View bindable) {
+		protected override void OnDetachingFrom(VisualElement bindable) {
 			DeregisterEvent(EventName);
 			base.OnDetachingFrom(bindable);
+		}
+
+		static void OnEventNameChanged(BindableObject bindable, object oldValue, object newValue) {
+			var behavior = (EventToCommandBehavior)bindable;
+
+			if (behavior.AssociatedObject == null) return;
+
+			string oldEventName = (string)oldValue;
+			string newEventName = (string)newValue;
+
+			behavior.DeregisterEvent(oldEventName);
+			behavior.RegisterEvent(newEventName);
 		}
 
 		void RegisterEvent(string name) {
@@ -59,17 +71,14 @@ namespace OxbridgeApp.Views.Behaviors
 		}
 
 		void DeregisterEvent(string name) {
-			if (string.IsNullOrWhiteSpace(name)) {
+			if (string.IsNullOrWhiteSpace(name) || eventHandler == null)
 				return;
-			}
 
-			if (eventHandler == null) {
-				return;
-			}
 			EventInfo eventInfo = AssociatedObject.GetType().GetRuntimeEvent(name);
-			if (eventInfo == null) {
+
+			if (eventInfo == null)
 				throw new ArgumentException(string.Format("EventToCommandBehavior: Can't de-register the '{0}' event.", EventName));
-			}
+
 			eventInfo.RemoveEventHandler(AssociatedObject, eventHandler);
 			eventHandler = null;
 		}
@@ -93,17 +102,6 @@ namespace OxbridgeApp.Views.Behaviors
 			}
 		}
 
-		static void OnEventNameChanged(BindableObject bindable, object oldValue, object newValue) {
-			var behavior = (EventToCommandBehavior)bindable;
-			if (behavior.AssociatedObject == null) {
-				return;
-			}
-
-			string oldEventName = (string)oldValue;
-			string newEventName = (string)newValue;
-
-			behavior.DeregisterEvent(oldEventName);
-			behavior.RegisterEvent(newEventName);
-		}
+		
 	}
 }

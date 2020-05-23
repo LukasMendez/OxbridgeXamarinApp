@@ -14,6 +14,7 @@ namespace OxbridgeApp.ViewModels
         public Command SpectateCommand { get; set; }
         public ICommand ItemSelectedCommand { get; set; }
         public ObservableCollection<Race> RaceList { get; set; }
+        public Race SelectedRace { get; set; }
 
 
         #region remove this
@@ -88,15 +89,16 @@ namespace OxbridgeApp.ViewModels
                 },
                 (object message) => { Console.WriteLine("*CanSpectate*"); return true; });
 
-            ItemSelectedCommand = new Command<Race>(OutputRace);
+            ItemSelectedCommand = new Command<Race>(SelectRace);
 
             UpdateRaceList();
             Console.WriteLine();
 
         }
 
-        void OutputRace(Race race) {
+        void SelectRace(Race race) {
             Console.WriteLine("selectedItem: " + race.StartTime + " " + race.LocationDescription);
+            SelectedRace = race;
         }
 
         private async void UpdateRaceList() {

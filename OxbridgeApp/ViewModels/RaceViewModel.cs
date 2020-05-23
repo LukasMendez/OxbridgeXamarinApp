@@ -11,6 +11,7 @@ using System.Threading;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Runtime.ExceptionServices;
+using System.Windows.Input;
 
 namespace OxbridgeApp.ViewModels
 {
@@ -29,6 +30,20 @@ namespace OxbridgeApp.ViewModels
         public Command SouthCommand { get; set; }
         public Command EastCommand { get; set; }
         public Command WestCommand { get; set; }
+        private ICommand appearingCommand { get; set; }
+        public ICommand AppearingCommand {
+            get {
+                return appearingCommand ?? (appearingCommand = new Command(this.Appearing));
+            }
+        }
+        private ICommand disappearingCommand { get; set; }
+        public ICommand DisappearingCommand {
+            get {
+                return disappearingCommand ?? (disappearingCommand = new Command(this.Disappearing));
+            }
+        }
+
+
 
         // Boat image
         private BitmapDescriptor boatPin = BitmapDescriptorFactory.FromBundle("boatSmall.png");
@@ -39,6 +54,9 @@ namespace OxbridgeApp.ViewModels
             Participants = new Dictionary<string, Position>();
             App.WebConnection.NewCoordReceived += ReceivedCoord;
             App.WebConnection.ConnectSocket();
+
+            //AppearingCommand = new Command(Appearing);
+            //DisappearingCommand = new Command(Disappearing);
 
 
             this.NorthCommand = new Command(
@@ -108,6 +126,14 @@ namespace OxbridgeApp.ViewModels
 
         }
 
+        private void Appearing() {
+            Console.WriteLine();
+        }
+
+        private void Disappearing() {
+            Console.WriteLine();
+        }
+
         public void StartCoordinateTimer() {
             Device.StartTimer(new TimeSpan(0, 0, 1), () =>
             {
@@ -165,66 +191,82 @@ namespace OxbridgeApp.ViewModels
             catch (Exception ex) { //sometimes catching a "Collection was modified; enumeration operation may not execute." exception
                 Console.WriteLine("*** " + ex.Message);
             }
-
         }
 
         private void LoadCheckPoints() {
+            var viewModel = ServiceContainer.Resolve<MainMenuViewModel>();
+            var selectedRace = viewModel.SelectedRace;
+            
+            for (int i = 0; i < selectedRace.CheckPoints.Count; i++) {
+                Circle checkPoint = new Circle
+                {
+                    Tag = i+1,
+                    Center = new Position(selectedRace.CheckPoints[i].Latitude, selectedRace.CheckPoints[i].Longitude),
+                    Radius = new Distance(50),
+                    StrokeColor = Color.FromRgba(255, 51, 51, 88), //red
+                    StrokeWidth = 3,
+                    FillColor = Color.FromRgba(255, 51, 51, 50)
+                };
+                Map.Circles.Add(checkPoint);
+                CheckPoints.Add(checkPoint);
+            }
+            
             //checkpoints HARDCODED TEMPORARY! (should get from server request)
-            Circle firstCheckpoint = new Circle
-            {
-                Tag = 1,
-                Center = new Position(54.914359, 9.780739),
-                Radius = new Distance(50),
-                StrokeColor = Color.FromRgba(255, 51, 51, 88), //red
-                StrokeWidth = 3,
-                FillColor = Color.FromRgba(255, 51, 51, 50)
-            };
-            Map.Circles.Add(firstCheckpoint);
-            CheckPoints.Add(firstCheckpoint);
-            Circle secondCheckpoint = new Circle
-            {
-                Tag = 2,
-                Center = new Position(54.916548, 9.776104),
-                Radius = new Distance(50),
-                StrokeColor = Color.FromRgba(255, 51, 51, 88),
-                StrokeWidth = 3,
-                FillColor = Color.FromRgba(255, 51, 51, 50)
-            };
-            Map.Circles.Add(secondCheckpoint);
-            CheckPoints.Add(secondCheckpoint);
-            Circle thirdCheckpoint = new Circle
-            {
-                Tag = 3,
-                Center = new Position(54.916326, 9.769967),
-                Radius = new Distance(50),
-                StrokeColor = Color.FromRgba(255, 51, 51, 88),
-                StrokeWidth = 3,
-                FillColor = Color.FromRgba(255, 51, 51, 50)
-            };
-            Map.Circles.Add(thirdCheckpoint);
-            CheckPoints.Add(thirdCheckpoint);
-            Circle fourthCheckpoint = new Circle
-            {
-                Tag = 4,
-                Center = new Position(54.918386, 9.765483),
-                Radius = new Distance(50),
-                StrokeColor = Color.FromRgba(255, 51, 51, 88),
-                StrokeWidth = 3,
-                FillColor = Color.FromRgba(255, 51, 51, 50)
-            };
-            Map.Circles.Add(fourthCheckpoint);
-            CheckPoints.Add(fourthCheckpoint);
-            Circle fifthCheckpoint = new Circle
-            {
-                Tag = 5,
-                Center = new Position(54.921617, 9.766491),
-                Radius = new Distance(50),
-                StrokeColor = Color.FromRgba(255, 51, 51, 88), 
-                StrokeWidth = 3,
-                FillColor = Color.FromRgba(255, 51, 51, 50)
-            };
-            Map.Circles.Add(fifthCheckpoint);
-            CheckPoints.Add(fifthCheckpoint);
+            //Circle firstCheckpoint = new Circle
+            //{
+            //    Tag = 1,
+            //    Center = new Position(54.914359, 9.780739),
+            //    Radius = new Distance(50),
+            //    StrokeColor = Color.FromRgba(255, 51, 51, 88), //red
+            //    StrokeWidth = 3,
+            //    FillColor = Color.FromRgba(255, 51, 51, 50)
+            //};
+            //Map.Circles.Add(firstCheckpoint);
+            //CheckPoints.Add(firstCheckpoint);
+            //Circle secondCheckpoint = new Circle
+            //{
+            //    Tag = 2,
+            //    Center = new Position(54.916548, 9.776104),
+            //    Radius = new Distance(50),
+            //    StrokeColor = Color.FromRgba(255, 51, 51, 88),
+            //    StrokeWidth = 3,
+            //    FillColor = Color.FromRgba(255, 51, 51, 50)
+            //};
+            //Map.Circles.Add(secondCheckpoint);
+            //CheckPoints.Add(secondCheckpoint);
+            //Circle thirdCheckpoint = new Circle
+            //{
+            //    Tag = 3,
+            //    Center = new Position(54.916326, 9.769967),
+            //    Radius = new Distance(50),
+            //    StrokeColor = Color.FromRgba(255, 51, 51, 88),
+            //    StrokeWidth = 3,
+            //    FillColor = Color.FromRgba(255, 51, 51, 50)
+            //};
+            //Map.Circles.Add(thirdCheckpoint);
+            //CheckPoints.Add(thirdCheckpoint);
+            //Circle fourthCheckpoint = new Circle
+            //{
+            //    Tag = 4,
+            //    Center = new Position(54.918386, 9.765483),
+            //    Radius = new Distance(50),
+            //    StrokeColor = Color.FromRgba(255, 51, 51, 88),
+            //    StrokeWidth = 3,
+            //    FillColor = Color.FromRgba(255, 51, 51, 50)
+            //};
+            //Map.Circles.Add(fourthCheckpoint);
+            //CheckPoints.Add(fourthCheckpoint);
+            //Circle fifthCheckpoint = new Circle
+            //{
+            //    Tag = 5,
+            //    Center = new Position(54.921617, 9.766491),
+            //    Radius = new Distance(50),
+            //    StrokeColor = Color.FromRgba(255, 51, 51, 88), 
+            //    StrokeWidth = 3,
+            //    FillColor = Color.FromRgba(255, 51, 51, 50)
+            //};
+            //Map.Circles.Add(fifthCheckpoint);
+            //CheckPoints.Add(fifthCheckpoint);
         }
 
         private void UpdateCheckPoints() {
