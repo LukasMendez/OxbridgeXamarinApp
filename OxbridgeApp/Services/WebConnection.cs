@@ -69,6 +69,23 @@ namespace OxbridgeApp.Services
             });
         }
 
+        public void DisconnectSocket() {
+            socket.Disconnect();
+            socket.Off();
+            socket.Close();
+            socket = null;
+
+            //socket.On(Socket.EVENT_DISCONNECT, () =>
+            //{
+            //    Connected = false;
+            //    socket.On("disconnect", (data) =>
+            //    {
+                    
+
+            //    });
+            //});
+        }
+
 
 
         /// <summary>
@@ -76,8 +93,11 @@ namespace OxbridgeApp.Services
         /// </summary>
         /// <param name="coordinate"></param>
         public void SendCoordinate(Coordinate coordinate) {
-            string jsonCoordinate = JsonConvert.SerializeObject(coordinate);
-            socket.Emit("coord", jsonCoordinate);
+            if(socket != null) {
+                string jsonCoordinate = JsonConvert.SerializeObject(coordinate);
+                socket.Emit("coord", jsonCoordinate);
+            }
+            
         }
 
         

@@ -17,7 +17,13 @@ namespace OxbridgeApp.ViewModels
 {
     public class RaceViewModel : BaseViewModel
     {
-        public Map Map { get; private set; }
+        private Map map;
+        public Map MyMap {
+            get { return map; }
+            set { map = value;
+                this.OnPropertyChanged();
+            }
+        }
         private double Latitude { get; set; }
         private double Longitude { get; set; }
         public Position MyPosition { get; set; }
@@ -43,20 +49,41 @@ namespace OxbridgeApp.ViewModels
             }
         }
 
-
-
         // Boat image
         private BitmapDescriptor boatPin = BitmapDescriptorFactory.FromBundle("boatSmall.png");
 
 
         public RaceViewModel() {
-            UserName = "Robert";
             Participants = new Dictionary<string, Position>();
+            this.MyMap = new Map();
+            this.MyMap.MapType = MapType.Hybrid;
+            UserName = "Robert";
             App.WebConnection.NewCoordReceived += ReceivedCoord;
             App.WebConnection.ConnectSocket();
 
-            //AppearingCommand = new Command(Appearing);
-            //DisappearingCommand = new Command(Disappearing);
+            //initial position
+            Latitude = 54.912163;
+            Longitude = 9.782445;
+            MyPosition = new Position(Latitude, Longitude);
+
+            CheckPoints = new List<Circle>();
+            NextCheckPoint = 1;
+
+            //move to testing position 
+            MyMap.MoveToRegion(
+                MapSpan.FromCenterAndRadius(
+                MyPosition, Distance.FromKilometers(1)));
+
+            MyPosPin = new Pin
+            {
+                Label = "initial",
+                Type = PinType.Place,
+                Position = new Position(Latitude, Longitude),
+                Icon = boatPin
+            };
+            MyMap.Pins.Add(MyPosPin);
+
+            
 
 
             this.NorthCommand = new Command(
@@ -91,59 +118,40 @@ namespace OxbridgeApp.ViewModels
                     Console.WriteLine("*West*");
                 },
                 (object message) => { Console.WriteLine("*CanWest*"); return true; });
-
-
-            //initial position
-            Latitude = 54.912163;
-            Longitude = 9.782445;
-            MyPosition = new Position(Latitude, Longitude);
-            Map = new Map();
-            Map.MapType = MapType.Hybrid;
-            CheckPoints = new List<Circle>();
-            NextCheckPoint = 1;
-
-
-
-            //move to position (should probably move to the first checkpoint when entering map)
-            Map.MoveToRegion(
-                MapSpan.FromCenterAndRadius(
-                MyPosition, Distance.FromKilometers(1)));
-
-            MyPosPin = new Pin
-            {
-                Label = "Robert",
-                Type = PinType.Place,
-                Position = new Position(Latitude, Longitude),
-                Icon = boatPin
-            };
-            Map.Pins.Add(MyPosPin);
-
-            StartCoordinateTimer();
-            LoadCheckPoints();
-            UpdateCheckPoints();
-
-
-
         }
 
         private void Appearing() {
-            Console.WriteLine();
+
+            //this.MyMap = new Map();
+            //this.MyMap.MapType = MapType.Hybrid;
+            runTimer = true;
+            LoadCheckPoints();
+            StartCoordinateTimer();
+            UpdateCheckPoints();
         }
 
         private void Disappearing() {
+            //App.WebConnection.DisconnectSocket();
+            runTimer = false;
             Console.WriteLine();
         }
 
+        bool runTimer = true;
         public void StartCoordinateTimer() {
             Device.StartTimer(new TimeSpan(0, 0, 1), () =>
             {
-                //UpdatePositionFromGPS(); //comment out when testing
-                UpdateAllPins();
-                return true;
+                if (runTimer) {
+                    //UpdatePositionFromGPS(); //comment out when testing
+                    UpdateAllPins();
+                    return true;
+                } else {
+                    return false;
+                }
+                
             });
         }
 
-        bool first = true;
+        bool first = true; //only move the map one time
         private async void UpdatePositionFromGPS() {
             var request = new Xamarin.Essentials.GeolocationRequest(Xamarin.Essentials.GeolocationAccuracy.Medium);
             var location = await Xamarin.Essentials.Geolocation.GetLocationAsync(request);
@@ -153,7 +161,7 @@ namespace OxbridgeApp.ViewModels
 
             if (first) {
                 Position currentPosition = new Position(location.Latitude, location.Longitude);
-                Map.MoveToRegion(
+                MyMap.MoveToRegion(
                     MapSpan.FromCenterAndRadius(
                     currentPosition, Distance.FromKilometers(1)));
                 first = false;
@@ -164,7 +172,7 @@ namespace OxbridgeApp.ViewModels
             App.WebConnection.SendCoordinate(new Coordinate(UserName, new Position(Latitude,Longitude)));
 
             try {
-                Map.Pins.Clear();
+                MyMap.Pins.Clear();
                 foreach (var item in Participants) {
                     if (!item.Key.Equals(UserName)) { //if opponent
                         Pin opponentPin = new Pin
@@ -175,7 +183,7 @@ namespace OxbridgeApp.ViewModels
                             Transparency = 0.5f,
                             Icon = boatPin
                         };
-                        Map.Pins.Add(opponentPin);
+                        MyMap.Pins.Add(opponentPin);
                     } else {
                         MyPosPin = new Pin
                         {
@@ -184,7 +192,7 @@ namespace OxbridgeApp.ViewModels
                             Position = item.Value,
                             Icon = boatPin
                         };
-                        Map.Pins.Add(MyPosPin);
+                        MyMap.Pins.Add(MyPosPin);
                     }
                 }
             }
@@ -196,7 +204,7 @@ namespace OxbridgeApp.ViewModels
         private void LoadCheckPoints() {
             var viewModel = ServiceContainer.Resolve<MainMenuViewModel>();
             var selectedRace = viewModel.SelectedRace;
-            
+            MyMap.Circles.Clear();
             for (int i = 0; i < selectedRace.CheckPoints.Count; i++) {
                 Circle checkPoint = new Circle
                 {
@@ -207,7 +215,7 @@ namespace OxbridgeApp.ViewModels
                     StrokeWidth = 3,
                     FillColor = Color.FromRgba(255, 51, 51, 50)
                 };
-                Map.Circles.Add(checkPoint);
+                MyMap.Circles.Add(checkPoint);
                 CheckPoints.Add(checkPoint);
             }
             
