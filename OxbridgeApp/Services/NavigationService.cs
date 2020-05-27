@@ -10,16 +10,15 @@ using OxbridgeApp.Views;
 
 namespace OxbridgeApp.Services
 {
-    class NavigationService : INavigationService
-    {
+    class NavigationService : INavigationService {
         private readonly ISettingsService _settingsService;
 
         //Dictionary to store instances of Pages/Views so they dont have to be newed again to be used
-        private Dictionary<string, Page> existingPages;
-        public Dictionary<string, Page> ExistingPages {
-            get { return existingPages; }
-            set { existingPages = value; }
-        }
+        //private Dictionary<string, Page> existingPages;
+        //public Dictionary<string, Page> ExistingPages {
+        //    get { return existingPages; }
+        //    set { existingPages = value; }
+        //}
 
         public BaseViewModel PreviousPageViewModel {
             get {
@@ -30,9 +29,9 @@ namespace OxbridgeApp.Services
         }
 
         public NavigationService(ISettingsService settingsService) {
-            if (ExistingPages == null) {
-                ExistingPages = new Dictionary<string, Page>();
-            }
+            //if (ExistingPages == null) {
+            //    ExistingPages = new Dictionary<string, Page>();
+            //}
             _settingsService = settingsService;
         }
 
@@ -150,14 +149,18 @@ namespace OxbridgeApp.Services
             }
 
             Page page = Activator.CreateInstance(pageType) as Page;
-            if (!ExistingPages.ContainsKey(page.ToString())) //Only add to dictionary if not exists
-            {
-                ExistingPages.Add(page.ToString(), page);
-                return page; //if not exists return new page
-            } else {
-                Console.WriteLine("******** " + page.ToString());
-                return ExistingPages[page.ToString()]; //if exists return existing page
-            }
+            return page;
+            //if (page.ToString().Equals("OxbridgeApp.Views.RaceView")) {
+            //    ExistingPages.Remove(page.ToString());
+            //}
+            //if (!ExistingPages.ContainsKey(page.ToString())) //Only add to dictionary if not exists
+            //{
+            //    ExistingPages.Add(page.ToString(), page);
+            //    return page; //if not exists return new page
+            //} else {
+            //    Console.WriteLine("******** " + page.ToString());
+            //    return ExistingPages[page.ToString()]; //if exists return existing page
+            //}
         }
     }
 }

@@ -9,12 +9,21 @@ using Newtonsoft.Json;
 using OxbridgeApp.Models;
 using System.Threading;
 using System.Diagnostics;
+using System.Threading.Tasks;
+using System.Runtime.ExceptionServices;
+using System.Windows.Input;
 
 namespace OxbridgeApp.ViewModels
 {
     public class RaceViewModel : BaseViewModel
     {
-        public Map Map { get; private set; }
+        private Map map;
+        public Map MyMap {
+            get { return map; }
+            set { map = value;
+                this.OnPropertyChanged();
+            }
+        }
         private double Latitude { get; set; }
         private double Longitude { get; set; }
         public Position MyPosition { get; set; }
@@ -27,16 +36,54 @@ namespace OxbridgeApp.ViewModels
         public Command SouthCommand { get; set; }
         public Command EastCommand { get; set; }
         public Command WestCommand { get; set; }
+        private ICommand appearingCommand { get; set; }
+        public ICommand AppearingCommand {
+            get {
+                return appearingCommand ?? (appearingCommand = new Command(this.Appearing));
+            }
+        }
+        private ICommand disappearingCommand { get; set; }
+        public ICommand DisappearingCommand {
+            get {
+                return disappearingCommand ?? (disappearingCommand = new Command(this.Disappearing));
+            }
+        }
 
         // Boat image
         private BitmapDescriptor boatPin = BitmapDescriptorFactory.FromBundle("boatSmall.png");
 
 
         public RaceViewModel() {
-            UserName = "Robert";
             Participants = new Dictionary<string, Position>();
+            this.MyMap = new Map();
+            this.MyMap.MapType = MapType.Hybrid;
+            UserName = "Robert";
             App.WebConnection.NewCoordReceived += ReceivedCoord;
             App.WebConnection.ConnectSocket();
+
+            //initial position
+            Latitude = 54.912163;
+            Longitude = 9.782445;
+            MyPosition = new Position(Latitude, Longitude);
+
+            CheckPoints = new List<Circle>();
+            NextCheckPoint = 1;
+
+            //move to testing position 
+            MyMap.MoveToRegion(
+                MapSpan.FromCenterAndRadius(
+                MyPosition, Distance.FromKilometers(1)));
+
+            MyPosPin = new Pin
+            {
+                Label = "initial",
+                Type = PinType.Place,
+                Position = new Position(Latitude, Longitude),
+                Icon = boatPin
+            };
+            MyMap.Pins.Add(MyPosPin);
+
+            
 
 
             this.NorthCommand = new Command(
@@ -71,66 +118,61 @@ namespace OxbridgeApp.ViewModels
                     Console.WriteLine("*West*");
                 },
                 (object message) => { Console.WriteLine("*CanWest*"); return true; });
-
-
-            //initial position
-            Latitude = 54.912163;
-            Longitude = 9.782445;
-            MyPosition = new Position(Latitude, Longitude);
-            Map = new Map();
-            Map.MapType = MapType.Hybrid;
-            CheckPoints = new List<Circle>();
-            NextCheckPoint = 1;
-
-
-
-            //move to position (should probably move to the first checkpoint when entering map)
-            Map.MoveToRegion(
-                MapSpan.FromCenterAndRadius(
-                MyPosition, Distance.FromKilometers(1)));
-
-            MyPosPin = new Pin
-            {
-                Label = "Robert",
-                Type = PinType.Place,
-                Position = new Position(Latitude, Longitude),
-                Icon = boatPin
-            };
-            Map.Pins.Add(MyPosPin);
-
-            StartCoordinateTimer();
-            LoadCheckPoints();
-            UpdateCheckPoints();
-
-
-
         }
 
+        private void Appearing() {
+
+            //this.MyMap = new Map();
+            //this.MyMap.MapType = MapType.Hybrid;
+            runTimer = true;
+            LoadCheckPoints();
+            StartCoordinateTimer();
+            UpdateCheckPoints();
+        }
+
+        private void Disappearing() {
+            //App.WebConnection.DisconnectSocket();
+            runTimer = false;
+            Console.WriteLine();
+        }
+
+        bool runTimer = true;
         public void StartCoordinateTimer() {
             Device.StartTimer(new TimeSpan(0, 0, 1), () =>
             {
-                UpdateAllPins();
-                return true;
+                if (runTimer) {
+                    //UpdatePositionFromGPS(); //comment out when testing
+                    UpdateAllPins();
+                    return true;
+                } else {
+                    return false;
+                }
+                
             });
         }
 
+        bool first = true; //only move the map one time
+        private async void UpdatePositionFromGPS() {
+            var request = new Xamarin.Essentials.GeolocationRequest(Xamarin.Essentials.GeolocationAccuracy.Medium);
+            var location = await Xamarin.Essentials.Geolocation.GetLocationAsync(request);
+
+            Latitude = location.Latitude;
+            Longitude = location.Longitude;
+
+            if (first) {
+                Position currentPosition = new Position(location.Latitude, location.Longitude);
+                MyMap.MoveToRegion(
+                    MapSpan.FromCenterAndRadius(
+                    currentPosition, Distance.FromKilometers(1)));
+                first = false;
+            }
+        }
+
         public void UpdateAllPins() {
-            //pin position HARDCODED TEMPORARY! (should get from device GPS)
-            //MyPosPin = new Pin
-            //{
-            //    Label = "Me",
-            //    Address = "My Boat",
-            //    Type = PinType.Place,
-            //    Position = new Position(Latitude, Longitude),
-            //    //Transparency = 0.7f
-            //};
-            //Map.Pins.Clear();
-            //Map.Pins.Add(MyPosPin);
-            
             App.WebConnection.SendCoordinate(new Coordinate(UserName, new Position(Latitude,Longitude)));
 
             try {
-                Map.Pins.Clear();
+                MyMap.Pins.Clear();
                 foreach (var item in Participants) {
                     if (!item.Key.Equals(UserName)) { //if opponent
                         Pin opponentPin = new Pin
@@ -141,7 +183,7 @@ namespace OxbridgeApp.ViewModels
                             Transparency = 0.5f,
                             Icon = boatPin
                         };
-                        Map.Pins.Add(opponentPin);
+                        MyMap.Pins.Add(opponentPin);
                     } else {
                         MyPosPin = new Pin
                         {
@@ -150,7 +192,7 @@ namespace OxbridgeApp.ViewModels
                             Position = item.Value,
                             Icon = boatPin
                         };
-                        Map.Pins.Add(MyPosPin);
+                        MyMap.Pins.Add(MyPosPin);
                     }
                 }
             }
@@ -160,62 +202,79 @@ namespace OxbridgeApp.ViewModels
         }
 
         private void LoadCheckPoints() {
+            var viewModel = ServiceContainer.Resolve<MainMenuViewModel>();
+            var selectedRace = viewModel.SelectedRace;
+            MyMap.Circles.Clear();
+            for (int i = 0; i < selectedRace.CheckPoints.Count; i++) {
+                Circle checkPoint = new Circle
+                {
+                    Tag = i+1,
+                    Center = new Position(selectedRace.CheckPoints[i].Latitude, selectedRace.CheckPoints[i].Longitude),
+                    Radius = new Distance(50),
+                    StrokeColor = Color.FromRgba(255, 51, 51, 88), //red
+                    StrokeWidth = 3,
+                    FillColor = Color.FromRgba(255, 51, 51, 50)
+                };
+                MyMap.Circles.Add(checkPoint);
+                CheckPoints.Add(checkPoint);
+            }
+            
             //checkpoints HARDCODED TEMPORARY! (should get from server request)
-            Circle firstCheckpoint = new Circle
-            {
-                Tag = 1,
-                Center = new Position(54.914359, 9.780739),
-                Radius = new Distance(50),
-                StrokeColor = Color.FromRgba(255, 51, 51, 88), //red
-                StrokeWidth = 3,
-                FillColor = Color.FromRgba(255, 51, 51, 50)
-            };
-            Map.Circles.Add(firstCheckpoint);
-            CheckPoints.Add(firstCheckpoint);
-            Circle secondCheckpoint = new Circle
-            {
-                Tag = 2,
-                Center = new Position(54.916548, 9.776104),
-                Radius = new Distance(50),
-                StrokeColor = Color.FromRgba(255, 51, 51, 88),
-                StrokeWidth = 3,
-                FillColor = Color.FromRgba(255, 51, 51, 50)
-            };
-            Map.Circles.Add(secondCheckpoint);
-            CheckPoints.Add(secondCheckpoint);
-            Circle thirdCheckpoint = new Circle
-            {
-                Tag = 3,
-                Center = new Position(54.916326, 9.769967),
-                Radius = new Distance(50),
-                StrokeColor = Color.FromRgba(255, 51, 51, 88),
-                StrokeWidth = 3,
-                FillColor = Color.FromRgba(255, 51, 51, 50)
-            };
-            Map.Circles.Add(thirdCheckpoint);
-            CheckPoints.Add(thirdCheckpoint);
-            Circle fourthCheckpoint = new Circle
-            {
-                Tag = 4,
-                Center = new Position(54.918386, 9.765483),
-                Radius = new Distance(50),
-                StrokeColor = Color.FromRgba(255, 51, 51, 88),
-                StrokeWidth = 3,
-                FillColor = Color.FromRgba(255, 51, 51, 50)
-            };
-            Map.Circles.Add(fourthCheckpoint);
-            CheckPoints.Add(fourthCheckpoint);
-            Circle fifthCheckpoint = new Circle
-            {
-                Tag = 5,
-                Center = new Position(54.921617, 9.766491),
-                Radius = new Distance(50),
-                StrokeColor = Color.FromRgba(255, 51, 51, 88), 
-                StrokeWidth = 3,
-                FillColor = Color.FromRgba(255, 51, 51, 50)
-            };
-            Map.Circles.Add(fifthCheckpoint);
-            CheckPoints.Add(fifthCheckpoint);
+            //Circle firstCheckpoint = new Circle
+            //{
+            //    Tag = 1,
+            //    Center = new Position(54.914359, 9.780739),
+            //    Radius = new Distance(50),
+            //    StrokeColor = Color.FromRgba(255, 51, 51, 88), //red
+            //    StrokeWidth = 3,
+            //    FillColor = Color.FromRgba(255, 51, 51, 50)
+            //};
+            //Map.Circles.Add(firstCheckpoint);
+            //CheckPoints.Add(firstCheckpoint);
+            //Circle secondCheckpoint = new Circle
+            //{
+            //    Tag = 2,
+            //    Center = new Position(54.916548, 9.776104),
+            //    Radius = new Distance(50),
+            //    StrokeColor = Color.FromRgba(255, 51, 51, 88),
+            //    StrokeWidth = 3,
+            //    FillColor = Color.FromRgba(255, 51, 51, 50)
+            //};
+            //Map.Circles.Add(secondCheckpoint);
+            //CheckPoints.Add(secondCheckpoint);
+            //Circle thirdCheckpoint = new Circle
+            //{
+            //    Tag = 3,
+            //    Center = new Position(54.916326, 9.769967),
+            //    Radius = new Distance(50),
+            //    StrokeColor = Color.FromRgba(255, 51, 51, 88),
+            //    StrokeWidth = 3,
+            //    FillColor = Color.FromRgba(255, 51, 51, 50)
+            //};
+            //Map.Circles.Add(thirdCheckpoint);
+            //CheckPoints.Add(thirdCheckpoint);
+            //Circle fourthCheckpoint = new Circle
+            //{
+            //    Tag = 4,
+            //    Center = new Position(54.918386, 9.765483),
+            //    Radius = new Distance(50),
+            //    StrokeColor = Color.FromRgba(255, 51, 51, 88),
+            //    StrokeWidth = 3,
+            //    FillColor = Color.FromRgba(255, 51, 51, 50)
+            //};
+            //Map.Circles.Add(fourthCheckpoint);
+            //CheckPoints.Add(fourthCheckpoint);
+            //Circle fifthCheckpoint = new Circle
+            //{
+            //    Tag = 5,
+            //    Center = new Position(54.921617, 9.766491),
+            //    Radius = new Distance(50),
+            //    StrokeColor = Color.FromRgba(255, 51, 51, 88), 
+            //    StrokeWidth = 3,
+            //    FillColor = Color.FromRgba(255, 51, 51, 50)
+            //};
+            //Map.Circles.Add(fifthCheckpoint);
+            //CheckPoints.Add(fifthCheckpoint);
         }
 
         private void UpdateCheckPoints() {
@@ -224,10 +283,10 @@ namespace OxbridgeApp.ViewModels
                     item.StrokeColor = Color.FromRgba(51, 61, 255, 88); //blue
                     item.FillColor = Color.FromRgba(51, 61, 255, 50);
                     if (!item.Tag.Equals("done")) {
-                        if (item.Center.Latitude - MyPosPin.Position.Latitude >= -0.0005 &&
-                        item.Center.Latitude - MyPosPin.Position.Latitude <= 0.0005 &&
-                        item.Center.Longitude - MyPosPin.Position.Longitude >= -0.0005 &&
-                        item.Center.Longitude - MyPosPin.Position.Longitude <= 0.0005) {
+                        if (item.Center.Latitude - MyPosPin.Position.Latitude >= -0.0006 &&
+                        item.Center.Latitude - MyPosPin.Position.Latitude <= 0.0006 &&
+                        item.Center.Longitude - MyPosPin.Position.Longitude >= -0.0006 &&
+                        item.Center.Longitude - MyPosPin.Position.Longitude <= 0.0006) {
                             item.StrokeColor = Color.FromRgba(71, 255, 51, 88); //green
                             item.FillColor = Color.FromRgba(71, 255, 51, 50);
                             item.Tag = "done";
@@ -245,29 +304,7 @@ namespace OxbridgeApp.ViewModels
         /// <param name="message"></param>
         private void ReceivedCoord(object obj, string message) {
             Coordinate coordinate = JsonConvert.DeserializeObject<Coordinate>(message);
-            Participants[coordinate.UserName] = coordinate.Position;
-            //Opponents.Add(coordinate.UserName, coordinate.Position); //adding or updating this opponent
+            Participants[coordinate.UserName] = coordinate.Position; //adding or updating this opponent
         }
-
-        //private async void currentButton_Clicked(object sender, EventArgs e) {
-        //    var request = new GeolocationRequest(GeolocationAccuracy.Medium);
-        //    var location = await Geolocation.GetLocationAsync(request);
-
-        //    Position currentPosition = new Position(location.Latitude, location.Longitude);
-        //    MyMap.MoveToRegion(
-        //        MapSpan.FromCenterAndRadius(
-        //        currentPosition, Distance.FromKilometers(1)));
-
-        //    Pin pin = new Pin
-        //    {
-        //        Label = "Home",
-        //        Address = "The city with a boardwalk",
-        //        Type = PinType.Place,
-        //        Position = currentPosition
-        //    };
-
-        //    MyMap.Pins.Add(pin);
-        //}
-
     }
 }

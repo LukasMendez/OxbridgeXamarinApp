@@ -6,12 +6,64 @@
              mc:Ignorable="d"
              x:Class="OxbridgeApp.Views.MainMenuView"
              xmlns:baseViewModel="clr-namespace:OxbridgeApp.ViewModels;assembly=OxbridgeApp"
-             baseViewModel:ViewModelLocator.AutoWireViewModel="true">
+             baseViewModel:ViewModelLocator.AutoWireViewModel="true"
+             xmlns:behavior="clr-namespace:OxbridgeApp.Views.Behaviors">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <behavior:SelectedItemEventArgsToSelectedItemConverter x:Key="SelectedItemConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
+    
     <ContentPage.Content>
         <StackLayout Padding="10">
             <Label Text="MainMenu" VerticalOptions="Center" HorizontalOptions="Center" />
-            <Switch/>
+            <Label Text="Upcoming Events:"/>
+
+            <ListView x:Name="listView" VerticalOptions="Fill"
+                HasUnevenRows="true"
+                ItemsSource="{Binding RaceList}">
+                
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <ViewCell>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="40"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="50*"/>
+                                    <ColumnDefinition Width="25*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Label Grid.Column="1" 
+                                       Text="{Binding StartTime}" 
+                                       VerticalOptions="Center"
+                                       LineBreakMode="NoWrap" 
+                                       Style="{DynamicResource ListItemTextStyle}" 
+                                       FontSize="16" />
+                                <Label Grid.Column="2"
+                                       Text="{Binding LocationDescription}" 
+                                       VerticalOptions="Center"
+                                       LineBreakMode="NoWrap" 
+                                       Style="{DynamicResource ListItemTextStyle}" 
+                                       FontSize="16" />
+
+                            </Grid>
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+                <ListView.Behaviors>
+                    <behavior:EventToCommandBehavior EventName="ItemSelected" Command="{Binding ItemSelectedCommand}" Converter="{StaticResource SelectedItemConverter}" />
+                </ListView.Behaviors>
+            </ListView>
+
+            <Label Text="{Binding ErrorMessage}" TextColor="Red" FontAttributes="Bold"/>
+            <Label Text="InfoLabel1"/>
+            <Label Text="InfoLabel2"/>
             <Button Text="Spectate" Command="{Binding SpectateCommand}"/>
+            <Label Text="InfoLabel3"/>
+
             <!--Test Area-->
             <!--<Label Text="{Binding InfoMessage}"/>
             <Button Text="Connect" Command="{Binding ConnectCommand}"/>

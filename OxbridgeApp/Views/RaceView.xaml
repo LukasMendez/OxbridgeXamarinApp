@@ -1,15 +1,18 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
-<ContentPage
-    xmlns="http://xamarin.com/schemas/2014/forms"
-    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:maps="clr-namespace:Xamarin.Forms.GoogleMaps;assembly=Xamarin.Forms.GoogleMaps"
-    x:Class="OxbridgeApp.Views.RaceView"
-    xmlns:baseViewModel="clr-namespace:OxbridgeApp.ViewModels;assembly=OxbridgeApp"
-    baseViewModel:ViewModelLocator.AutoWireViewModel="true">
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             xmlns:maps="clr-namespace:Xamarin.Forms.GoogleMaps;assembly=Xamarin.Forms.GoogleMaps"
+             x:Class="OxbridgeApp.Views.RaceView"
+             xmlns:baseViewModel="clr-namespace:OxbridgeApp.ViewModels;assembly=OxbridgeApp"
+             baseViewModel:ViewModelLocator.AutoWireViewModel="true"
+             xmlns:behavior="clr-namespace:OxbridgeApp.Views.Behaviors">
     <ContentPage.Content>
         <AbsoluteLayout>
             
-            <ContentView  Content="{Binding Map}" AbsoluteLayout.LayoutBounds="1,1,1,1" AbsoluteLayout.LayoutFlags="All"/>
+            <ContentView  Content="{Binding MyMap}" AbsoluteLayout.LayoutBounds="1,1,1,1" AbsoluteLayout.LayoutFlags="All"/>
             
             <Grid  AbsoluteLayout.LayoutBounds="0,1,.4,.27" AbsoluteLayout.LayoutFlags="All"  >
                 <Grid.RowDefinitions>
@@ -32,4 +35,9 @@
         </AbsoluteLayout>
         <!--<maps:Map x:Name="RaceMap" WidthRequest="420" HeightRequest="300" IsShowingUser="False" MapType="Hybrid"/>-->
     </ContentPage.Content>
+    
+    <ContentPage.Behaviors>
+        <behavior:EventToCommandBehavior EventName="Disappearing" Command="{Binding DisappearingCommand}" />
+        <behavior:EventToCommandBehavior EventName="Appearing" Command="{Binding AppearingCommand}" />
+    </ContentPage.Behaviors>
 </ContentPage>
