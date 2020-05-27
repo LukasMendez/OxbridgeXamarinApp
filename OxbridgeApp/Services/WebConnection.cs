@@ -110,6 +110,11 @@ namespace OxbridgeApp.Services
         {
             using (var httpClient = new HttpClient { BaseAddress = new Uri(Constants.HostName) })
             {
+                //httpClient.DefaultRequestHeaders.Authorization =
+                //new AuthenticationHeaderValue("Bearer", Preferences.Get(GlobalKeys.TokenKey, "null"));
+
+                //httpClient.
+
                 try {
                     var response = await httpClient.GetStringAsync("races").ConfigureAwait(false);
                     return JsonConvert.DeserializeObject<ObservableCollection<Race>>(response.ToString());
