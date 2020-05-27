@@ -110,6 +110,10 @@ namespace OxbridgeApp.Services
         {
             using (var httpClient = new HttpClient { BaseAddress = new Uri(Constants.HostName) })
             {
+                //httpClient.DefaultRequestHeaders.Authorization =
+                //new AuthenticationHeaderValue("Bearer", Preferences.Get(GlobalKeys.TokenKey, "null"));
+
+
                 try {
                     var response = await httpClient.GetStringAsync("races").ConfigureAwait(false);
                     return JsonConvert.DeserializeObject<ObservableCollection<Race>>(response.ToString());
@@ -149,36 +153,36 @@ namespace OxbridgeApp.Services
             }
         }
 
-        public async Task<bool> ValidateToken(string token) {
-            using (var httpClient = new HttpClient { BaseAddress = new Uri(Constants.HostName) }) {
-                try {
-                    // Authorization
-                    httpClient.DefaultRequestHeaders.Authorization =
-                    new AuthenticationHeaderValue("Bearer", Preferences.Get(GlobalKeys.TokenKey, "null"));
+        //public async Task<bool> ValidateToken(string token) {
+        //    using (var httpClient = new HttpClient { BaseAddress = new Uri(Constants.HostName) }) {
+        //        try {
+        //            // Authorization
+        //            httpClient.DefaultRequestHeaders.Authorization =
+        //            new AuthenticationHeaderValue("Bearer", Preferences.Get(GlobalKeys.TokenKey, "null"));
 
-                    // var response = await client.PostAsync(address, new StringContent(content, Encoding.UTF8, "application/json"));
-                    var response = await httpClient.GetAsync("/validateToken");
+        //            // var response = await client.PostAsync(address, new StringContent(content, Encoding.UTF8, "application/json"));
+        //            var response = await httpClient.GetAsync("/validateToken");
 
-                    string body = await response.Content.ReadAsStringAsync();
-                    Console.WriteLine(body);
+        //            string body = await response.Content.ReadAsStringAsync();
+        //            Console.WriteLine(body);
 
 
-                    JObject jObj = JObject.Parse(body);
-                    Console.WriteLine("Was parsing the body to a JObject successful: " + jObj != null);
-                    if (jObj != null) {
-                        bool auth = (bool)jObj.SelectToken("auth");
-                        if (auth == true) {
-                            return true;
-                        }
-                    }
-                }
-                catch (Newtonsoft.Json.JsonReaderException ex) {
-                    Console.WriteLine(ex.Message);
-                    return false;
-                }
-                return false;
-            }
-        }
+        //            JObject jObj = JObject.Parse(body);
+        //            Console.WriteLine("Was parsing the body to a JObject successful: " + jObj != null);
+        //            if (jObj != null) {
+        //                bool auth = (bool)jObj.SelectToken("auth");
+        //                if (auth == true) {
+        //                    return true;
+        //                }
+        //            }
+        //        }
+        //        catch (Newtonsoft.Json.JsonReaderException ex) {
+        //            Console.WriteLine(ex.Message);
+        //            return false;
+        //        }
+        //        return false;
+        //    }
+        //}
 
 
 
