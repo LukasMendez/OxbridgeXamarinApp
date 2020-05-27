@@ -58,9 +58,12 @@
                 </ListView.Behaviors>
             </ListView>
 
-            <Switch/>
-            <Entry Placeholder="Husker den det du skriver her? "/>
+            <Label Text="{Binding ErrorMessage}" TextColor="Red" FontAttributes="Bold"/>
+            <Label Text="InfoLabel1"/>
+            <Label Text="InfoLabel2"/>
             <Button Text="Spectate" Command="{Binding SpectateCommand}"/>
+            <Label Text="InfoLabel3"/>
+
             <!--Test Area-->
             <!--<Label Text="{Binding InfoMessage}"/>
             <Button Text="Connect" Command="{Binding ConnectCommand}"/>

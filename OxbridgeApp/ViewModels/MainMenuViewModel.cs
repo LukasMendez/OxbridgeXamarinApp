@@ -15,6 +15,13 @@ namespace OxbridgeApp.ViewModels
         public ICommand ItemSelectedCommand { get; set; }
         public ObservableCollection<Race> RaceList { get; set; }
         public Race SelectedRace { get; set; }
+        private string errorMessage;
+        public string ErrorMessage {
+            get { return errorMessage; }
+            set { errorMessage = value;
+                this.OnPropertyChanged();}
+        }
+
 
 
         #region remove this
@@ -104,13 +111,17 @@ namespace OxbridgeApp.ViewModels
         private async void UpdateRaceList() {
             ObservableCollection<Race> temp;
             temp = await GetRaces();
-            foreach (var item in temp) {
-                RaceList.Add(item);
+            if (temp != null) {
+                foreach (var item in temp) {
+                    RaceList.Add(item);
+                }
+            } else {
+                ErrorMessage = "Server-Error getting races.";
             }
         }
 
         private async Task<ObservableCollection<Race>> GetRaces() {
-            return await WebConnection.GetRaces();
+            return await App.WebConnection.GetRaces();
         }
     }
 }

@@ -10,8 +10,9 @@
     <ContentPage.Content>
         <StackLayout Padding="10">
             <Label Text="Login" VerticalOptions="Center" HorizontalOptions="Center" />
-            <Entry Placeholder="Username"/>
-            <Entry Placeholder="Password" IsPassword="True"/>
+            <Entry Placeholder="Username" Text="{Binding Username}"/>
+            <Entry Placeholder="Password" Text="{Binding Password}" IsPassword="True"/>
+            <Label Text="{Binding ErrorMessage}" TextColor="Red" FontAttributes="Bold"/>
             <Button Text="Login" Command="{Binding LoginCommand}"/>
         </StackLayout>
     </ContentPage.Content>
