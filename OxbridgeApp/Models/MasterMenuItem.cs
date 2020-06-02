@@ -4,7 +4,8 @@ using System.Text;
 
 namespace OxbridgeApp.Models
 {
-    public class MasterMenuItems
+    public class MasterMenuItem
+
     {
         public string Text { get; set; }
         public string Detail { get; set; }

@@ -27,7 +27,7 @@ namespace OxbridgeApp.ViewModels
             Console.WriteLine("*** autowire called");
             var view = bindable as Element;
             if (view == null) {
-                Console.WriteLine("ViewModel type was null");
+                Console.WriteLine("View type was null");
                 return;
             }
 
@@ -37,7 +37,9 @@ namespace OxbridgeApp.ViewModels
             var viewModelName = string.Format(CultureInfo.InvariantCulture, "{0}Model, {1}", viewName, viewAssemblyName);
 
             var viewModelType = Type.GetType(viewModelName);
+            Console.WriteLine("ViewModel type: " +viewModelName);
             if (viewModelType == null) {
+                Console.WriteLine("ViewModel type was null");
                 return;
             }
             var viewModel = ServiceContainer.Resolve(viewModelType);

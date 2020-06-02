@@ -13,13 +13,8 @@ namespace OxbridgeApp.Models
         bool IsAdmin { get; set; }
         string Team { get; set; }
 
-        public User(string fullName, string username, string password, bool isTeamLeader, bool isAdmin, string team) {
-            this.FullName = fullName;
-            this.Username = username;
-            this.Password = password;
-            this.IsTeamLeader = isTeamLeader;
-            this.IsAdmin = isAdmin;
-            this.Team = team;
+        public User() {
+
         }
     }
 }

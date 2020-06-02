@@ -9,13 +9,15 @@
             <Color x:Key="WhiteColor">#ffffff</Color>
             <Color x:Key="BlackColor">#000000</Color>
             <Color x:Key="BackgroundColor">#F4F6FA</Color>
+            <Color x:Key="DarkRedColor">#B33014</Color>
             <Color x:Key="AccentColor">#00857D</Color>
             <Color x:Key="LightGreenColor">#83D01B</Color>
+            <Color x:Key="DarkGray">#120F0F</Color>
             <Color x:Key="GreenColor">#00A69C</Color>
             <Color x:Key="DarkGreenColor">#00857D</Color>
             <Color x:Key="GrayColor">#e2e2e2</Color>
             <Color x:Key="ErrorColor">#ff5252</Color>
-            <Color x:Key="TextColor">#757575</Color>
+            <Color x:Key="TextColor">#1A1919</Color>
             <Color x:Key="InverseTextColor">#FFFFFF</Color>
             <Color x:Key="LightTextColor">#979797</Color>
             <Color x:Key="iOSDefaultTintColor">#007aff</Color>
@@ -57,7 +59,7 @@
 
             <OnPlatform x:TypeArguments="Color"
                         x:Key="EntryBackgroundColor">
-                <On Platform="iOS" Value="{ StaticResource iOSEntryBackgroundColor }" />
+                <On Platform="iOS" Value="{ StaticResource WhiteColor }" />
                 <On Platform="Android" Value="{ StaticResource AndroidEntryBackgroundColor }" />
             </OnPlatform>
 
@@ -202,14 +204,18 @@
             </Style>
 
             <!-- IMPLICIT STYLES -->
+            <Style TargetType="StackLayout" ApplyToDerivedTypes="True" CanCascade="True">
+                <Setter Property="BackgroundColor" Value="White"/>
+            </Style>
+
             <Style TargetType="Button" ApplyToDerivedTypes="True" CanCascade="True">
                 <Setter Property="FontSize" Value="{ StaticResource BaseButtonFontSize }" />
                 <Setter Property="FontAttributes" Value="{ StaticResource BaseButtonFontAttributes }" />
                 <Setter Property="BorderRadius" Value="{ StaticResource BaseButtonBorderRadius }" />
                 <Setter Property="BorderWidth" Value="{ StaticResource BaseButtonBorderWidth }" />
-                <Setter Property="BackgroundColor" Value="{ StaticResource DefaultButtonClassBackgroundColor }" />
+                <Setter Property="BackgroundColor" Value="{ StaticResource DarkRedColor }" />
                 <Setter Property="BorderColor" Value="{ StaticResource DefaultButtonClassBorderColor }" />
-                <Setter Property="TextColor" Value="{ StaticResource DefaultButtonClassTextColor }" />
+                <Setter Property="TextColor" Value="{ StaticResource WhiteColor }" />
             </Style>
 
             <Style TargetType="Label" ApplyToDerivedTypes="True" CanCascade="True">
@@ -233,7 +239,7 @@
             </Style>
 
             <Style TargetType="ListView" ApplyToDerivedTypes="True" CanCascade="True">
-                <Setter Property="BackgroundColor" Value="{ StaticResource ThemeListViewBackgroundColor }" />
+                <Setter Property="BackgroundColor" Value="{ StaticResource WhiteColor }" />
                 <Setter Property="SeparatorColor" Value="{ StaticResource SeparatorLineColor }" />
                 <Setter Property="SeparatorVisibility" Value="Default" />
             </Style>
@@ -244,7 +250,7 @@
 
 
             <Style TargetType="NavigationPage">
-                <Setter Property="BarBackgroundColor" Value="{StaticResource GreenColor}"/>
+                <Setter Property="BarBackgroundColor" Value="{StaticResource BlackColor}"/>
                 <Setter Property="BarTextColor" Value="{StaticResource WhiteColor}"/>
             </Style>
 

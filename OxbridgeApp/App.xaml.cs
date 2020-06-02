@@ -34,13 +34,12 @@ namespace OxbridgeApp
             ServiceContainer.Register<LoginViewModel>(() => new LoginViewModel());
             ServiceContainer.Register<RaceViewModel>(() => new RaceViewModel());
 
-            var masterDetailViewModel = new MasterDetailViewModel();
-            ServiceContainer.Register<MasterDetailViewModel>(() => masterDetailViewModel);
+            ServiceContainer.Register<MasterDetailViewModel>(() => new MasterDetailViewModel());
 
             //MainPage = new MainPage();
-            var master = new Views.MasterDetail();
+            var master = new Views.MasterDetailView();
             MainPage = master;
-            master.BindingContext = masterDetailViewModel;
+          //  master.BindingContext = masterDetailViewModel;
         }
 
         private Task InitNavigation() {

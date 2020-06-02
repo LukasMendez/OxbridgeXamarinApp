@@ -28,7 +28,13 @@ namespace OxbridgeApp.ViewModels
                 {
                     bool success = await App.WebConnection.Login(Username, Password);
                     if (success) {
-                        Console.WriteLine(Preferences.Get(GlobalKeys.TokenKey,"none"));
+                        Console.WriteLine(Preferences.Get(CurrentUser.TokenKey,"none"));
+
+                        var masterDetailViewModel = ServiceContainer.Resolve<MasterDetailViewModel>();
+                        // If the MasterMenuItem 'Login' was visible before. It will be hidden as the user is now logged in
+                        // This will add a 'Sign-out' button instead
+                        masterDetailViewModel.SwitchLoginState();
+
                         await NavigationService.NavigateToAsync<MainMenuViewModel>();
                     } else {
                         ErrorMessage = "Invalid username or password";
