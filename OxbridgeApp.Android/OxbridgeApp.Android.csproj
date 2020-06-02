@@ -122,9 +122,13 @@
   </ItemGroup>
   <ItemGroup>
     <AndroidAsset Include="Assets\boatSmall.png" />
-    <AndroidAsset Include="Assets\leader.png" />
-    <AndroidAsset Include="Assets\start.png" />
     <AndroidAsset Include="Assets\exit.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidAsset Include="Assets\leader.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidAsset Include="Assets\start.png" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
 </Project>
