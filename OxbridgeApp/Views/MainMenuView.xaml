@@ -13,7 +13,7 @@
             <behavior:SelectedItemEventArgsToSelectedItemConverter x:Key="SelectedItemConverter" />
         </ResourceDictionary>
     </ContentPage.Resources>
-    
+
     <ContentPage.Content>
         <StackLayout Padding="10">
             <Label Text="MainMenu" VerticalOptions="Center" HorizontalOptions="Center" />
@@ -21,8 +21,8 @@
 
             <ListView x:Name="listView" VerticalOptions="Fill"
                 HasUnevenRows="true"
+                BackgroundColor="Transparent"
                 ItemsSource="{Binding RaceList}">
-                
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <ViewCell>
@@ -32,7 +32,7 @@
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="2*"/>
-                                    <ColumnDefinition Width="50*"/>
+                                    <ColumnDefinition Width="35*"/>
                                     <ColumnDefinition Width="25*"/>
                                 </Grid.ColumnDefinitions>
 
@@ -48,7 +48,6 @@
                                        LineBreakMode="NoWrap" 
                                        Style="{DynamicResource ListItemTextStyle}" 
                                        FontSize="16" />
-
                             </Grid>
                         </ViewCell>
                     </DataTemplate>

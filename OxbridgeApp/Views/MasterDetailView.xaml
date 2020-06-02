@@ -1,0 +1,66 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<MasterDetailPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:OxbridgeApp.Models"
+             xmlns:vm="clr-namespace:OxbridgeApp.ViewModels"
+             xmlns:customviews="clr-namespace:OxbridgeApp.Views.CustomViews"
+             xmlns:baseViewModel="clr-namespace:OxbridgeApp.ViewModels;assembly=OxbridgeApp"
+             baseViewModel:ViewModelLocator.AutoWireViewModel="true"
+             xmlns:behavior="clr-namespace:OxbridgeApp.Views.Behaviors"
+             x:Class="OxbridgeApp.Views.MasterDetailView"
+             IsPresented="{Binding IsPresented, Mode=TwoWay}">
+    <MasterDetailPage.Resources>
+        <Style TargetType="ListView" x:Key="MasterDetailListView">
+            <Setter Property="BackgroundColor" Value="Transparent"/>
+            <Setter Property="SeparatorVisibility" Value="None"/>
+        </Style>
+         <ResourceDictionary>
+            <behavior:SelectedItemEventArgsToSelectedItemConverter x:Key="SelectedItemConverter" />
+        </ResourceDictionary>
+    </MasterDetailPage.Resources>
+    <MasterDetailPage.Master>
+        <ContentPage Title="Menu" BackgroundColor="{StaticResource DarkGray}">
+            <ContentPage.IconImageSource>
+                <OnPlatform x:TypeArguments="FileImageSource" iOS="3bar@2x.png"/>
+            </ContentPage.IconImageSource>
+            <ContentPage.Content>
+                <StackLayout Orientation="Vertical" BackgroundColor="Transparent">
+                    <Image x:Name="profileImage" WidthRequest="150" HeightRequest="150"></Image>
+                    <ListView
+                              Style="{StaticResource MasterDetailListView}"
+                              HasUnevenRows="True"
+                              RowHeight="-1"
+                              ItemsSource="{Binding MasterMenuItems}">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <customviews:CustomViewCell>
+                                    <Grid Padding="20,15" Margin="0,10" ColumnSpacing="20" BackgroundColor="DarkSlateGray" VerticalOptions="FillAndExpand">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="30"/>
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Image Source="{Binding ImagePath}" />
+                                        <Label Grid.Column="1" Text="{Binding Text}" TextColor="White" VerticalOptions="Center"/>
+                                    </Grid>
+                                </customviews:CustomViewCell>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                        <ListView.Behaviors>
+                            <behavior:EventToCommandBehavior EventName="ItemSelected" Command="{Binding ChangeVMCMD}" Converter="{StaticResource SelectedItemConverter}" />
+                        </ListView.Behaviors>
+                    </ListView>
+                </StackLayout>
+            </ContentPage.Content>
+        </ContentPage>
+    </MasterDetailPage.Master>
+
+    <MasterDetailPage.Detail>
+        <ContentPage Title="Content" Padding="15">
+            <ContentPage.Content>
+                <StackLayout Margin="10">
+                    <Label Text="Content Page Items"></Label>
+                </StackLayout>
+            </ContentPage.Content>
+        </ContentPage>
+    </MasterDetailPage.Detail>
+</MasterDetailPage>

@@ -37,25 +37,6 @@ namespace OxbridgeApp.Services
         }
 
 
-        //public void ConnectAndTest()
-        //{
-        //    socket = IO.Socket(Constants.HostName);
-        //    socket.On(Socket.EVENT_CONNECT, () =>
-        //    {
-        //        Connected = true;
-        //        ConnectedEvent?.Invoke(null);
-        //        //    socket.Emit("hi");
-        //        socket.On("hi", (data) =>
-        //        {
-        //            Console.WriteLine("Received from server: " + data);
-        //            NewMessageReceived?.Invoke(null, data.ToString());
-        //        });
-        //    });
-        //}
-        //public void SendMessage(string message) {
-        //    socket.Emit("hi", message);
-
-        //}
 
         /// <summary>
         /// used for sending/receiving coordinates
@@ -105,7 +86,11 @@ namespace OxbridgeApp.Services
         }
 
         
-
+        /// <summary>
+        /// This method will retrieve a list of upcoming races. It doesn't require a token, as anonymous users can also
+        /// see this kind of information. 
+        /// </summary>
+        /// <returns></returns>
         public async Task<ObservableCollection<Race>> GetRaces()
         {
             using (var httpClient = new HttpClient { BaseAddress = new Uri(Constants.HostName) })
@@ -139,9 +124,17 @@ namespace OxbridgeApp.Services
                         string body = await response.Content.ReadAsStringAsync();
                         JObject jObj = JObject.Parse(body);
                         if (jObj != null) {
-                            string token = (string)jObj.SelectToken("token");
+                            // Get the values out of the JSON 
+                            string tokenValue = (string)jObj.SelectToken("token");
+                            string fullNameValue = (string)jObj.SelectToken("fullName");
+                            string usernameValue = (string)jObj.SelectToken("username");
+                            bool isAdminValue = (bool)jObj.SelectToken("isAdmin");
+                            bool isTeamLeaderValue = (bool)jObj.SelectToken("isTeamLeader");
+                            string teamValue = (string)jObj.SelectToken("team");
                             // We store these preferences for later use
-                            Preferences.Set(GlobalKeys.TokenKey, token);
+                            CurrentUser.SetCurrentUser(tokenValue, fullNameValue, usernameValue, isAdminValue, isTeamLeaderValue, teamValue);
+                            CurrentUser.IsLoggedIn = true;
+
                             return true;
                         }
                     }
@@ -149,6 +142,8 @@ namespace OxbridgeApp.Services
                 catch (Exception e) {
                     Console.WriteLine(e.Message);
                 }
+
+                CurrentUser.IsLoggedIn = false;
                 return false;
             }
         }
