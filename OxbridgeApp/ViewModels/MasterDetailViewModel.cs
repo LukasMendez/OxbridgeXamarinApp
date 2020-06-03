@@ -6,6 +6,8 @@ using System.Windows.Input;
 using Xamarin.Forms;
 using OxbridgeApp.Models;
 using System.Collections.ObjectModel;
+using OxbridgeApp.Services;
+using Xamarin.Essentials;
 
 namespace OxbridgeApp.ViewModels
 {
@@ -64,6 +66,7 @@ namespace OxbridgeApp.ViewModels
             MasterMenuItems.Add(LoginItem);
 
             ChangeVMCMD = new Command<MasterMenuItem>(SelectPage);
+            SwitchLoginState(); //checking if user is already logged in at startup
 
         }
 
@@ -71,19 +74,33 @@ namespace OxbridgeApp.ViewModels
         {
             IsPresented = false;
             Console.WriteLine("*Switching view*");
+            if (item.Text.Equals("Sign-out")) {
+                SignOut();
+            }
             await NavigationService.NavigateToAsync(item.TargetViewModel);
 
         }
 
+        private void SignOut() {
+            CurrentUser.RemoveCurrentUser();
+            SwitchLoginState();
+        }
+
         public void SwitchLoginState()
         {
-            if (MasterMenuItems.Contains(LoginItem))
-            {
-                MasterMenuItems.Remove(LoginItem);
+            //making sure we actually know if we are logged in
+            if(Preferences.Get(CurrentUser.TokenKey, null) != null) { //if has token
+                CurrentUser.IsLoggedIn = true;
+            } else {
+                CurrentUser.IsLoggedIn = false;
+            }
+            //clear menuItems (avoiding any weird situations)
+            MasterMenuItems.Remove(LoginItem);
+            MasterMenuItems.Remove(SignOutItem);
+            //set correct menuItem
+            if (CurrentUser.IsLoggedIn) {
                 MasterMenuItems.Add(SignOutItem);
-            } else if (MasterMenuItems.Contains(SignOutItem))
-            {
-                MasterMenuItems.Remove(SignOutItem);
+            } else {
                 MasterMenuItems.Add(LoginItem);
             }
         }

@@ -54,11 +54,12 @@ namespace OxbridgeApp.Services
             });
         }
 
+        //doesnt work
         public void DisconnectSocket() {
-            socket.Disconnect();
-            socket.Off();
-            socket.Close();
-            socket = null;
+            //socket.Disconnect();
+            //socket.Off();
+            //socket.Close();
+            //socket = null;
 
             //socket.On(Socket.EVENT_DISCONNECT, () =>
             //{
@@ -147,6 +148,40 @@ namespace OxbridgeApp.Services
                 return false;
             }
         }
+
+        public async Task<bool> JoinRace(int raceID) {
+            using (var httpClient = new HttpClient { BaseAddress = new Uri(Constants.HostName) }) {
+                httpClient.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("Bearer", Preferences.Get(CurrentUser.TokenKey, "null"));
+
+                var obj = new { raceID };
+                string jsonObj = JsonConvert.SerializeObject(obj);
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "races/joinRace/");
+                request.Content = new StringContent(jsonObj, Encoding.UTF8, "application/json");
+
+                try {
+                    var response = await httpClient.SendAsync(request);
+
+                    if (response.StatusCode == HttpStatusCode.OK) {
+                        string body = await response.Content.ReadAsStringAsync();
+                        JObject jObj = JObject.Parse(body);
+                        if (jObj != null) {
+                            // Get the values out of the JSON 
+                            bool access = (bool)jObj.SelectToken("access");
+                            string message = (string)jObj.SelectToken("message");
+                            Console.WriteLine(message);
+                            return access; //true or false depending on assignment to race
+                        }
+                    }
+                }
+                catch (Exception e) {
+                    Console.WriteLine(e.Message);
+                }
+                Console.WriteLine("*** Either not logged in or something terrible");
+                return false; //no response
+            }
+        }
+
 
         //public async Task<bool> ValidateToken(string token) {
         //    using (var httpClient = new HttpClient { BaseAddress = new Uri(Constants.HostName) }) {
