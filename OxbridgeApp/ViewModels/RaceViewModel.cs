@@ -259,7 +259,7 @@ namespace OxbridgeApp.ViewModels
         private void StartRace(object obj, string message) {
             runTimer = true;
             StartCoordinateTimer();
-            Console.WriteLine("*** race started");
+            Console.WriteLine("*** race started"); 
         }
     }
 }
