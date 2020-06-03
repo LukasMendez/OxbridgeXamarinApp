@@ -30,8 +30,12 @@ namespace OxbridgeApp.ViewModels
                 async (object message) =>
                 {
                     if(SelectedRace != null) {
-                        await App.WebConnection.JoinRace(SelectedRace.RaceID);
-                        //await NavigationService.NavigateToAsyncWithBack<RaceViewModel>();
+                        bool access = await App.WebConnection.JoinRace(SelectedRace.RaceID);
+                        if (access) {
+                            await NavigationService.NavigateToAsyncWithBack<RaceViewModel>();
+                        } else {
+                            await Application.Current.MainPage.DisplayAlert("Access denied", "Your team is not assigned to participate in this race", "Ok");
+                        }
                         //Console.WriteLine("*Spectate*");
                     }
                     
