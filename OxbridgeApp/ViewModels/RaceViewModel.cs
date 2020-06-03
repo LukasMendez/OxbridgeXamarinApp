@@ -12,6 +12,8 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Runtime.ExceptionServices;
 using System.Windows.Input;
+using Xamarin.Essentials;
+using Map = Xamarin.Forms.GoogleMaps.Map;
 
 namespace OxbridgeApp.ViewModels
 {
@@ -57,8 +59,9 @@ namespace OxbridgeApp.ViewModels
             Participants = new Dictionary<string, Position>();
             this.MyMap = new Map();
             this.MyMap.MapType = MapType.Hybrid;
-            UserName = "Robert";
+            UserName = Preferences.Get(CurrentUser.Username, null);
             App.WebConnection.NewCoordReceived += ReceivedCoord;
+            App.WebConnection.StartRaceReceived += StartRace;
             App.WebConnection.ConnectSocket();
 
             //initial position
@@ -83,15 +86,13 @@ namespace OxbridgeApp.ViewModels
             };
             MyMap.Pins.Add(MyPosPin);
 
-            
-
-
             this.NorthCommand = new Command(
                 (object message) =>
                 {
                     Latitude += 0.0002;
                     UpdateCheckPoints();
                     Console.WriteLine("*North*");
+                    App.WebConnection.SendHiTest();
                 },
                 (object message) => { Console.WriteLine("*CanNorth*"); return true; });
             this.SouthCommand = new Command(
@@ -124,7 +125,7 @@ namespace OxbridgeApp.ViewModels
 
             //this.MyMap = new Map();
             //this.MyMap.MapType = MapType.Hybrid;
-            runTimer = true;
+            //runTimer = true; //should be set from callback from emit.startRace from server
             LoadCheckPoints();
             StartCoordinateTimer();
             UpdateCheckPoints();
@@ -136,7 +137,7 @@ namespace OxbridgeApp.ViewModels
             Console.WriteLine();
         }
 
-        bool runTimer = true;
+        bool runTimer = false;
         public void StartCoordinateTimer() {
             Device.StartTimer(new TimeSpan(0, 0, 1), () =>
             {
@@ -169,7 +170,7 @@ namespace OxbridgeApp.ViewModels
         }
 
         public void UpdateAllPins() {
-            App.WebConnection.SendCoordinate(new Coordinate(UserName, new Position(Latitude,Longitude)));
+            App.WebConnection.SendCoordinate(new Coordinate("coordinate", UserName, new Position(Latitude,Longitude)));
 
             try {
                 MyMap.Pins.Clear();
@@ -218,63 +219,6 @@ namespace OxbridgeApp.ViewModels
                 MyMap.Circles.Add(checkPoint);
                 CheckPoints.Add(checkPoint);
             }
-            
-            //checkpoints HARDCODED TEMPORARY! (should get from server request)
-            //Circle firstCheckpoint = new Circle
-            //{
-            //    Tag = 1,
-            //    Center = new Position(54.914359, 9.780739),
-            //    Radius = new Distance(50),
-            //    StrokeColor = Color.FromRgba(255, 51, 51, 88), //red
-            //    StrokeWidth = 3,
-            //    FillColor = Color.FromRgba(255, 51, 51, 50)
-            //};
-            //Map.Circles.Add(firstCheckpoint);
-            //CheckPoints.Add(firstCheckpoint);
-            //Circle secondCheckpoint = new Circle
-            //{
-            //    Tag = 2,
-            //    Center = new Position(54.916548, 9.776104),
-            //    Radius = new Distance(50),
-            //    StrokeColor = Color.FromRgba(255, 51, 51, 88),
-            //    StrokeWidth = 3,
-            //    FillColor = Color.FromRgba(255, 51, 51, 50)
-            //};
-            //Map.Circles.Add(secondCheckpoint);
-            //CheckPoints.Add(secondCheckpoint);
-            //Circle thirdCheckpoint = new Circle
-            //{
-            //    Tag = 3,
-            //    Center = new Position(54.916326, 9.769967),
-            //    Radius = new Distance(50),
-            //    StrokeColor = Color.FromRgba(255, 51, 51, 88),
-            //    StrokeWidth = 3,
-            //    FillColor = Color.FromRgba(255, 51, 51, 50)
-            //};
-            //Map.Circles.Add(thirdCheckpoint);
-            //CheckPoints.Add(thirdCheckpoint);
-            //Circle fourthCheckpoint = new Circle
-            //{
-            //    Tag = 4,
-            //    Center = new Position(54.918386, 9.765483),
-            //    Radius = new Distance(50),
-            //    StrokeColor = Color.FromRgba(255, 51, 51, 88),
-            //    StrokeWidth = 3,
-            //    FillColor = Color.FromRgba(255, 51, 51, 50)
-            //};
-            //Map.Circles.Add(fourthCheckpoint);
-            //CheckPoints.Add(fourthCheckpoint);
-            //Circle fifthCheckpoint = new Circle
-            //{
-            //    Tag = 5,
-            //    Center = new Position(54.921617, 9.766491),
-            //    Radius = new Distance(50),
-            //    StrokeColor = Color.FromRgba(255, 51, 51, 88), 
-            //    StrokeWidth = 3,
-            //    FillColor = Color.FromRgba(255, 51, 51, 50)
-            //};
-            //Map.Circles.Add(fifthCheckpoint);
-            //CheckPoints.Add(fifthCheckpoint);
         }
 
         private void UpdateCheckPoints() {
@@ -305,6 +249,17 @@ namespace OxbridgeApp.ViewModels
         private void ReceivedCoord(object obj, string message) {
             Coordinate coordinate = JsonConvert.DeserializeObject<Coordinate>(message);
             Participants[coordinate.UserName] = coordinate.Position; //adding or updating this opponent
+        }
+
+        /// <summary>
+        /// fired by event when server emits "startrace"
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="message"></param>
+        private void StartRace(object obj, string message) {
+            runTimer = true;
+            StartCoordinateTimer();
+            Console.WriteLine("*** race started");
         }
     }
 }

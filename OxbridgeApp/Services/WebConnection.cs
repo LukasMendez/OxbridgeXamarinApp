@@ -28,6 +28,7 @@ namespace OxbridgeApp.Services
         //public event ConnectionHandler ConnectedEvent;
 
         public event MessageReceivedHandler NewCoordReceived;
+        public event MessageReceivedHandler StartRaceReceived;
 
         public WebConnection()
         {
@@ -39,17 +40,25 @@ namespace OxbridgeApp.Services
 
 
         /// <summary>
-        /// used for sending/receiving coordinates
+        /// opening a socket for handling race-related communication
         /// </summary>
         public void ConnectSocket() {
             socket = IO.Socket(Constants.HostName);
             socket.On(Socket.EVENT_CONNECT, () =>
             {
                 Connected = true;
-                socket.On("coord", (data) =>
+                socket.On("race", (data) =>
                 {
-                    Console.WriteLine("Received from server: " + data);
-                    NewCoordReceived?.Invoke(null, data.ToString());
+                    IMessage message = JsonConvert.DeserializeObject<Coordinate>(data.ToString());
+
+                    if (message.Header.Equals("coordinate")) {
+                        Console.WriteLine("Received from server: " + data);
+                        NewCoordReceived?.Invoke(null, data.ToString());
+                    }
+                    if (message.Header.Equals("startrace")) {
+                        Console.WriteLine("*** received emit startrace");
+                        StartRaceReceived?.Invoke(null, data.ToString());
+                    }
                 });
             });
         }
@@ -81,9 +90,14 @@ namespace OxbridgeApp.Services
         public void SendCoordinate(Coordinate coordinate) {
             if(socket != null) {
                 string jsonCoordinate = JsonConvert.SerializeObject(coordinate);
-                socket.Emit("coord", jsonCoordinate);
+                socket.Emit("race", jsonCoordinate);
             }
-            
+        }
+
+        public void SendHiTest() {
+            if (socket != null) {
+                socket.Emit("race", "hello");
+            }
         }
 
         
