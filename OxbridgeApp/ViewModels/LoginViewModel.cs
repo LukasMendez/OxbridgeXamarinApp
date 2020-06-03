@@ -35,6 +35,7 @@ namespace OxbridgeApp.ViewModels
                         // This will add a 'Sign-out' button instead
                         masterDetailViewModel.SwitchLoginState();
 
+
                         await NavigationService.NavigateToAsync<MainMenuViewModel>();
                     } else {
                         ErrorMessage = "Invalid username or password";

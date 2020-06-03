@@ -58,6 +58,7 @@
             </ListView>
 
             <Label Text="{Binding ErrorMessage}" TextColor="Red" FontAttributes="Bold"/>
+            <Button x:Name="TempButton" Text="print user" Clicked="TempButton_Clicked" />
             <Label Text="InfoLabel1"/>
             <Label Text="InfoLabel2"/>
             <Button Text="Spectate" Command="{Binding SpectateCommand}"/>
