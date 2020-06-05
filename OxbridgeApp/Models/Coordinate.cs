@@ -5,13 +5,15 @@ using Xamarin.Forms.GoogleMaps;
 
 namespace OxbridgeApp.Models
 {
-    public class Coordinate
+    public class Coordinate : IMessage
     {
-        public string UserName { get; set; }
+        public string Header { get; set; }
+        public string TeamName { get; set; }
         public Position Position { get; set; }
 
-        public Coordinate(string userName, Position position) {
-            this.UserName = userName;
+        public Coordinate(string header, string teamName, Position position) {
+            this.Header = header;
+            this.TeamName = teamName;
             this.Position = position;
         }
     }
