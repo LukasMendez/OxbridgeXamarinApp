@@ -29,6 +29,7 @@ namespace OxbridgeApp.Services
 
         public event MessageReceivedHandler NewCoordReceived;
         public event MessageReceivedHandler StartRaceReceived;
+        public event MessageReceivedHandler LeaderboardReceived;
 
         public WebConnection()
         {
@@ -51,13 +52,17 @@ namespace OxbridgeApp.Services
                 {
                     IMessage message = JsonConvert.DeserializeObject<Coordinate>(data.ToString());
 
-                    if (message.Header.Equals("coordinate")) {
-                        Console.WriteLine("Received from server: " + data);
+                    if (message.Header.Equals("coordinate")) { //receiving coordinates from all boats
+                        //Console.WriteLine("Received from server: " + data);
                         NewCoordReceived?.Invoke(null, data.ToString());
                     }
-                    if (message.Header.Equals("startrace")) {
-                        Console.WriteLine("*** received emit startrace");
+                    if (message.Header.Equals("startrace")) { //receiving instruction that race is started
+                        //Console.WriteLine("*** received emit startrace");
                         StartRaceReceived?.Invoke(null, data.ToString());
+                    }
+                    if (message.Header.Equals("checkpoint")) { //receiving leaderboard info by checkpoint completion
+                        //Console.WriteLine("Received leaderboard: " + data);
+                        LeaderboardReceived?.Invoke(null, data.ToString());
                     }
                 });
             });
@@ -87,10 +92,27 @@ namespace OxbridgeApp.Services
         /// used for sending this users coordinates to all other clients
         /// </summary>
         /// <param name="coordinate"></param>
-        public void SendCoordinate(Coordinate coordinate) {
+        public void SendMessage(Coordinate coordinate) {
             if(socket != null) {
                 string jsonCoordinate = JsonConvert.SerializeObject(coordinate);
                 socket.Emit("race", jsonCoordinate);
+            }
+        }
+
+        /// <summary>
+        /// used for sending checkpoint completion to all other clients
+        /// </summary>
+        /// <param name="checkpoint"></param>
+        public void SendMessage(Checkpoint checkpoint) {
+            if (socket != null) {
+                string jsonCheckpoint = JsonConvert.SerializeObject(checkpoint);
+                socket.Emit("race", jsonCheckpoint);
+            }
+        }
+        public void SendMessage(Object obj) {
+            if (socket != null) {
+                string jsonObj = JsonConvert.SerializeObject(obj);
+                socket.Emit("race", jsonObj);
             }
         }
 
