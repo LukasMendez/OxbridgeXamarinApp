@@ -6,12 +6,12 @@ namespace OxbridgeApp.Models
 {
     public class User
     {
-        string FullName { get; set; }
-        string Username { get; set; }
-        string Password { get; set; }
-        bool IsTeamLeader { get; set; }
-        bool IsAdmin { get; set; }
-        string Team { get; set; }
+        public string FullName { get; set; }
+        public string Username { get; set; }
+        public string Password { get; set; }
+        public bool IsTeamLeader { get; set; }
+        public bool IsAdmin { get; set; }
+        public string Team { get; set; }
 
         public User() {
 

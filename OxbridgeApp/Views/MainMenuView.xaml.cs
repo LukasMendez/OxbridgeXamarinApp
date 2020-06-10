@@ -3,6 +3,7 @@ using OxbridgeApp.Models;
 using OxbridgeApp.Services;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,10 +19,6 @@ namespace OxbridgeApp.Views
     {
         public MainMenuView() {
             InitializeComponent();
-        }
-
-        private void TempButton_Clicked(object sender, EventArgs e) {
-            Console.WriteLine("*** " + Preferences.Get(CurrentUser.Username, null));
         }
     }
 }

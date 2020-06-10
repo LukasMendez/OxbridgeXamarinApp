@@ -7,6 +7,6 @@ namespace OxbridgeApp.Models
     interface IMessage
     {
         string Header { get; set; }
-        string UserName { get; set; }
+        string TeamName { get; set; }
     }
 }

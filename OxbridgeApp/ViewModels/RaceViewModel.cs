@@ -14,6 +14,10 @@ using System.Runtime.ExceptionServices;
 using System.Windows.Input;
 using Xamarin.Essentials;
 using Map = Xamarin.Forms.GoogleMaps.Map;
+using System.IO.IsolatedStorage;
+using System.Reflection;
+using Newtonsoft.Json.Linq;
+using System.Collections.ObjectModel;
 
 namespace OxbridgeApp.ViewModels
 {
@@ -32,6 +36,14 @@ namespace OxbridgeApp.ViewModels
         private Pin MyPosPin { get; set; }
         private List<Circle> CheckPoints { get; set; }
         private Dictionary<string, Position> Participants { get; set; }
+        private ObservableCollection<string> leaderboardList;
+        public ObservableCollection<string> LeaderboardList {
+            get { return leaderboardList; }
+            set { leaderboardList = value;
+                this.OnPropertyChanged();
+            }
+        }
+
         private int NextCheckPoint { get; set; }
         private string UserName { get; set; }
         public Command NorthCommand { get; set; }
@@ -57,16 +69,18 @@ namespace OxbridgeApp.ViewModels
 
         public RaceViewModel() {
             Participants = new Dictionary<string, Position>();
+            LeaderboardList = new ObservableCollection<string>();
             this.MyMap = new Map();
             this.MyMap.MapType = MapType.Hybrid;
             UserName = Preferences.Get(CurrentUser.Username, null);
             App.WebConnection.NewCoordReceived += ReceivedCoord;
             App.WebConnection.StartRaceReceived += StartRace;
+            App.WebConnection.LeaderboardReceived += UpdateLeaderboard;
             App.WebConnection.ConnectSocket();
 
             //initial position
-            Latitude = 54.912163;
-            Longitude = 9.782445;
+            Latitude = 54.910646;
+            Longitude = 9.783899;
             MyPosition = new Position(Latitude, Longitude);
 
             CheckPoints = new List<Circle>();
@@ -89,46 +103,58 @@ namespace OxbridgeApp.ViewModels
             this.NorthCommand = new Command(
                 (object message) =>
                 {
-                    Latitude += 0.0002;
-                    UpdateCheckPoints();
-                    Console.WriteLine("*North*");
-                    App.WebConnection.SendHiTest();
+                    if (!mainMenuViewModel.IsSpectator) {
+                        Latitude += 0.0002;
+                        UpdateCheckPoints();
+                        Console.WriteLine("*North*");
+                    }
                 },
                 (object message) => { Console.WriteLine("*CanNorth*"); return true; });
             this.SouthCommand = new Command(
                 (object message) =>
                 {
-                    Latitude -= 0.0002;
-                    UpdateCheckPoints();
-                    Console.WriteLine("*South*");
+                    if (!mainMenuViewModel.IsSpectator) {
+                        Latitude -= 0.0002;
+                        UpdateCheckPoints();
+                        Console.WriteLine("*South*");
+                    }
                 },
                 (object message) => { Console.WriteLine("*CanSouth*"); return true; });
             this.EastCommand = new Command(
                 (object message) =>
                 {
-                   Longitude += 0.0002;
-                    UpdateCheckPoints();
-                    Console.WriteLine("*East*");
+                    if (!mainMenuViewModel.IsSpectator) {
+                        Longitude += 0.0002;
+                        UpdateCheckPoints();
+                        Console.WriteLine("*East*");
+                    }
                 },
                 (object message) => { Console.WriteLine("*CanEast*"); return true; });
             this.WestCommand = new Command(
                 (object message) =>
                 {
-                    Longitude -= 0.0002;
-                    UpdateCheckPoints();
-                    Console.WriteLine("*West*");
+                    if (!mainMenuViewModel.IsSpectator) {
+                        Longitude -= 0.0002;
+                        UpdateCheckPoints();
+                        Console.WriteLine("*West*");
+                    }
                 },
                 (object message) => { Console.WriteLine("*CanWest*"); return true; });
         }
-
+        MainMenuViewModel mainMenuViewModel;
         private void Appearing() {
-
+            mainMenuViewModel = ServiceContainer.Resolve<MainMenuViewModel>();
             //this.MyMap = new Map();
             //this.MyMap.MapType = MapType.Hybrid;
             //runTimer = true; //should be set from callback from emit.startRace from server
             LoadCheckPoints();
-            StartCoordinateTimer();
-            UpdateCheckPoints();
+            if (!mainMenuViewModel.IsSpectator) {
+                StartCoordinateTimer();
+                UpdateCheckPoints();
+                Console.WriteLine(Preferences.Get(CurrentUser.Team, null));
+                App.WebConnection.SendMessage(new { Header = "addtoleaderboard", TeamName = Preferences.Get(CurrentUser.Team, null).ToString() });
+            }
+            
         }
 
         private void Disappearing() {
@@ -170,12 +196,15 @@ namespace OxbridgeApp.ViewModels
         }
 
         public void UpdateAllPins() {
-            App.WebConnection.SendCoordinate(new Coordinate("coordinate", UserName, new Position(Latitude,Longitude)));
+            //send coordinates
+            if (!mainMenuViewModel.IsSpectator) {
+                App.WebConnection.SendMessage(new Coordinate("coordinate", Preferences.Get(CurrentUser.Team, null), new Position(Latitude, Longitude)));
+            }
 
             try {
                 MyMap.Pins.Clear();
                 foreach (var item in Participants) {
-                    if (!item.Key.Equals(UserName)) { //if opponent
+                    if (!item.Key.Equals(Preferences.Get(CurrentUser.Team, null))) { //if opponent
                         Pin opponentPin = new Pin
                         {
                             Label = item.Key,
@@ -223,18 +252,20 @@ namespace OxbridgeApp.ViewModels
 
         private void UpdateCheckPoints() {
             foreach (var item in CheckPoints) {
-                if (item.Tag.ToString().Equals(NextCheckPoint.ToString())) {
+                if (item.Tag.ToString().Equals(NextCheckPoint.ToString())) { //if this checkpoint is the next
                     item.StrokeColor = Color.FromRgba(51, 61, 255, 88); //blue
                     item.FillColor = Color.FromRgba(51, 61, 255, 50);
-                    if (!item.Tag.Equals("done")) {
-                        if (item.Center.Latitude - MyPosPin.Position.Latitude >= -0.0006 &&
+                    if (!item.Tag.Equals("done")) { //if this checkpoint is not already completed
+                        if (item.Center.Latitude - MyPosPin.Position.Latitude >= -0.0006 && //if boat is within this checkpoints range
                         item.Center.Latitude - MyPosPin.Position.Latitude <= 0.0006 &&
                         item.Center.Longitude - MyPosPin.Position.Longitude >= -0.0006 &&
                         item.Center.Longitude - MyPosPin.Position.Longitude <= 0.0006) {
                             item.StrokeColor = Color.FromRgba(71, 255, 51, 88); //green
                             item.FillColor = Color.FromRgba(71, 255, 51, 50);
-                            item.Tag = "done";
                             NextCheckPoint += 1;
+                            //emit the checkpoint since it was completed
+                            App.WebConnection.SendMessage(new Checkpoint("checkpoint", Preferences.Get(CurrentUser.Team, null), item.Tag));
+                            item.Tag = "done";
                         }
                     }
                 }
@@ -248,7 +279,7 @@ namespace OxbridgeApp.ViewModels
         /// <param name="message"></param>
         private void ReceivedCoord(object obj, string message) {
             Coordinate coordinate = JsonConvert.DeserializeObject<Coordinate>(message);
-            Participants[coordinate.UserName] = coordinate.Position; //adding or updating this opponent
+            Participants[coordinate.TeamName] = coordinate.Position; //adding or updating this opponent
         }
 
         /// <summary>
@@ -260,6 +291,21 @@ namespace OxbridgeApp.ViewModels
             runTimer = true;
             StartCoordinateTimer();
             Console.WriteLine("*** race started"); 
+        }
+
+        /// <summary>
+        /// fired by event when server emits "checkpoint"
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="message"></param>
+        private void UpdateLeaderboard(object obj, string message) {
+            SortedLeaderboard sortedLeaderboard = JsonConvert.DeserializeObject<SortedLeaderboard>(message);
+            LeaderboardList.Clear();
+            for (int i = 0; i < sortedLeaderboard.Leaderboard.Count; i++) {
+                //LeaderboardList.Add(i + 1, sortedLeaderboard.Leaderboard[i].TeamName);
+                LeaderboardList.Add(i+1 + " " + sortedLeaderboard.Leaderboard[i].TeamName);
+            }
+
         }
     }
 }

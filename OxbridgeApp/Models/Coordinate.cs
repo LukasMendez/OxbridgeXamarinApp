@@ -8,12 +8,12 @@ namespace OxbridgeApp.Models
     public class Coordinate : IMessage
     {
         public string Header { get; set; }
-        public string UserName { get; set; }
+        public string TeamName { get; set; }
         public Position Position { get; set; }
 
-        public Coordinate(string header, string userName, Position position) {
+        public Coordinate(string header, string teamName, Position position) {
             this.Header = header;
-            this.UserName = userName;
+            this.TeamName = teamName;
             this.Position = position;
         }
     }

@@ -12,8 +12,8 @@
             <Label Text="Login" VerticalOptions="Center" HorizontalOptions="Center" />
             <Entry Placeholder="Username" Text="{Binding Username}"/>
             <Entry Placeholder="Password" Text="{Binding Password}" IsPassword="True"/>
-            <Label Text="{Binding ErrorMessage}" TextColor="Red" FontAttributes="Bold"/>
-            <Button Text="Login" Command="{Binding LoginCommand}"/>
+            <Label x:Name="errorLabel" Text="{Binding ErrorMessage}" TextColor="Red" FontAttributes="Bold"/>
+            <Button x:Name="loginButton" Text="Login" Command="{Binding LoginCommand}" CommandParameter="{x:Reference loginButton}"/>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

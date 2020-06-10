@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Xamarin.Essentials;
 using Xamarin.Forms;
 
 namespace OxbridgeApp.ViewModels
@@ -21,24 +22,55 @@ namespace OxbridgeApp.ViewModels
             set { errorMessage = value;
                 this.OnPropertyChanged();}
         }
+        private string userText;
+        public string UserText {
+            get { return userText; }
+            set { userText = value;
+                this.OnPropertyChanged();}
+        }
+        private string raceButtonText;
+        public string RaceButtonText {
+            get { return raceButtonText; }
+            set {
+                raceButtonText = value;
+                this.OnPropertyChanged();
+            }
+        }
+        public bool IsSpectator { get; set; }
+
 
 
         public MainMenuViewModel() {
+            //Preferences.Get(CurrentUser.IsLoggedIn.ToString(), null) == null || Preferences.Get(CurrentUser.IsLoggedIn.ToString(), null).Equals("False")
+            string test = Preferences.Get(CurrentUser.IsLoggedIn.ToString(), null);
+            if (Preferences.Get(CurrentUser.Username.ToString(), null) != null && Preferences.Get(CurrentUser.Username.ToString(), null) != "usernameKey") {
+                UserText = "Welcome " + Preferences.Get(CurrentUser.Username, null) + " (" + Preferences.Get(CurrentUser.Team, null) + ")";
+                RaceButtonText = "Enter race";
+                IsSpectator = false;
+            } else {
+                UserText = "Welcome Spectator";
+                RaceButtonText = "Spectate";
+                IsSpectator = true;
+            }
+
             RaceList = new ObservableCollection<Race>();
 
             this.SpectateCommand = new Command(
                 async (object message) =>
                 {
                     if(SelectedRace != null) {
-                        bool access = await App.WebConnection.JoinRace(SelectedRace.RaceID);
-                        if (access) {
-                            await NavigationService.NavigateToAsyncWithBack<RaceViewModel>();
+                        if (!IsSpectator) {
+                            bool access = await App.WebConnection.JoinRace(SelectedRace.RaceID);
+                            if (access) {
+                                await NavigationService.NavigateToAsyncWithBack<RaceViewModel>();
+                            } else {
+                                await Application.Current.MainPage.DisplayAlert("Access denied", "Your team is not assigned to participate in this race", "Ok");
+                            }
+                            //Console.WriteLine("*Spectate*");
                         } else {
-                            await Application.Current.MainPage.DisplayAlert("Access denied", "Your team is not assigned to participate in this race", "Ok");
+                            await NavigationService.NavigateToAsyncWithBack<RaceViewModel>();
                         }
-                        //Console.WriteLine("*Spectate*");
                     }
-                    
                 },
                 (object message) => { Console.WriteLine("*CanSpectate*"); return true; });
 
@@ -69,5 +101,7 @@ namespace OxbridgeApp.ViewModels
         private async Task<ObservableCollection<Race>> GetRaces() {
             return await App.WebConnection.GetRaces();
         }
+
+        
     }
 }
