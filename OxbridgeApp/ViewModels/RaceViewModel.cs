@@ -153,7 +153,6 @@ namespace OxbridgeApp.ViewModels
                 Console.WriteLine(Preferences.Get(CurrentUser.Team, null));
                 App.WebConnection.SendMessage(new { Header = "addtoleaderboard", TeamName = Preferences.Get(CurrentUser.Team, null).ToString() });
             }
-            
         }
 
         private void Disappearing() {
@@ -304,7 +303,6 @@ namespace OxbridgeApp.ViewModels
                 //LeaderboardList.Add(i + 1, sortedLeaderboard.Leaderboard[i].TeamName);
                 LeaderboardList.Add(i+1 + " " + sortedLeaderboard.Leaderboard[i].TeamName);
             }
-
         }
     }
 }
