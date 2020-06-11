@@ -7,7 +7,8 @@
              x:Class="OxbridgeApp.Views.MainMenuView"
              xmlns:baseViewModel="clr-namespace:OxbridgeApp.ViewModels;assembly=OxbridgeApp"
              baseViewModel:ViewModelLocator.AutoWireViewModel="true"
-             xmlns:behavior="clr-namespace:OxbridgeApp.Views.Behaviors">
+             xmlns:behavior="clr-namespace:OxbridgeApp.Views.Behaviors"
+             Title="Main Menu">
     <ContentPage.Resources>
         <ResourceDictionary>
             <behavior:SelectedItemEventArgsToSelectedItemConverter x:Key="SelectedItemConverter" />
@@ -16,10 +17,13 @@
 
     <ContentPage.Content>
         <StackLayout Padding="10">
-            <Label Text="MainMenu" VerticalOptions="Center" HorizontalOptions="Center" />
-            <Label Text="{Binding UserText}" FontAttributes="Bold"/>
-            <Label Text="Upcoming Events:"/>
+            <Frame BackgroundColor="AliceBlue"> 
+                <StackLayout BackgroundColor="AliceBlue">
+                    <Label Text="{Binding UserText}" FontAttributes="Bold"/>
+                </StackLayout>
+            </Frame>
 
+            <Label FontAttributes="Bold" Text="Upcoming Events" Margin="0,20,0,0" HorizontalOptions="Center"/>
             <ListView x:Name="listView" VerticalOptions="Fill"
                 HasUnevenRows="true"
                 BackgroundColor="Transparent"
@@ -57,11 +61,14 @@
                     <behavior:EventToCommandBehavior EventName="ItemSelected" Command="{Binding ItemSelectedCommand}" Converter="{StaticResource SelectedItemConverter}" />
                 </ListView.Behaviors>
             </ListView>
+            <Frame HeightRequest="100" HorizontalOptions="Center">
+                <Label Text="{Binding RaceInformationLabel}"></Label>
+            </Frame>
 
             <Label Text="{Binding ErrorMessage}" TextColor="Red" FontAttributes="Bold"/>
-            <Label Text="InfoLabel2"/>
-            <Button Text="{Binding RaceButtonText}" Command="{Binding SpectateCommand}"/>
-            <Label Text="InfoLabel3"/>
+
+            <Button Text="{Binding RaceButtonText}" Command="{Binding SpectateCommand}" Margin="0,30" />
+
 
             <!--Test Area-->
             <!--<Label Text="{Binding InfoMessage}"/>
