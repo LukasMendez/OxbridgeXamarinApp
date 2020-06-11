@@ -14,7 +14,7 @@ namespace OxbridgeApp.ViewModels
     class MasterDetailViewModel : BaseViewModel
     {
 
-
+        private MainMenuViewModel mainMenuViewModel;
         private bool isPresented = false;
         public bool IsPresented {
             get
@@ -52,6 +52,7 @@ namespace OxbridgeApp.ViewModels
 
         public MasterDetailViewModel()
         {
+            mainMenuViewModel = ServiceContainer.Resolve<MainMenuViewModel>();
             MasterMenuItems = new ObservableCollection<MasterMenuItem>();
 
             MasterMenuItems.Add(new MasterMenuItem()
@@ -78,12 +79,14 @@ namespace OxbridgeApp.ViewModels
                 SignOut();
             }
             await NavigationService.NavigateToAsync(item.TargetViewModel);
-
         }
 
         private void SignOut() {
             CurrentUser.RemoveCurrentUser();
             SwitchLoginState();
+
+            mainMenuViewModel.UserText = "Welcome Spectator";
+            mainMenuViewModel.RaceButtonText = "Spectate";
         }
 
         public void SwitchLoginState()

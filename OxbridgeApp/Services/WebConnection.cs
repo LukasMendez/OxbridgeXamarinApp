@@ -50,7 +50,18 @@ namespace OxbridgeApp.Services
                 Connected = true;
                 socket.On("race", (data) =>
                 {
-                    IMessage message = JsonConvert.DeserializeObject<Coordinate>(data.ToString());
+                    //var settings = new JsonSerializerSettings();
+                    //settings.Converters.Add(new MessageConverter());
+
+                    IMessage message = JsonConvert.DeserializeObject<Message>(data.ToString());
+                    Console.WriteLine(message.Header);
+
+                    //IMessage message = JsonConvert.DeserializeObject<Message>(data.ToString(), new JsonSerializerSettings
+                    //{
+                    //    TypeNameHandling = TypeNameHandling.Auto,
+                    //    NullValueHandling = NullValueHandling.Ignore,
+
+                    //});
 
                     if (message.Header.Equals("coordinate")) { //receiving coordinates from all boats
                         //Console.WriteLine("Received from server: " + data);
@@ -94,13 +105,14 @@ namespace OxbridgeApp.Services
         /// <param name="coordinate"></param>
         public void SendMessage(Coordinate coordinate) {
             if(socket != null) {
+                
                 string jsonCoordinate = JsonConvert.SerializeObject(coordinate);
                 socket.Emit("race", jsonCoordinate);
             }
         }
 
         /// <summary>
-        /// used for sending checkpoint completion to all other clients
+        /// used for sending checkpoint completion to server and receiving leaderboard
         /// </summary>
         /// <param name="checkpoint"></param>
         public void SendMessage(Checkpoint checkpoint) {

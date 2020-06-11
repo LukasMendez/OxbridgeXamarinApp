@@ -32,6 +32,23 @@
                 <Button Command="{Binding WestCommand}" Text="W" Grid.Row="1" Grid.Column="0" TextColor="Black"/>
             </Grid>
 
+            <ListView AbsoluteLayout.LayoutBounds=".7,1,.4,.25" AbsoluteLayout.LayoutFlags="All" x:Name="listView" VerticalOptions="Fill"
+                HasUnevenRows="true"
+                BackgroundColor="Transparent"
+                ItemsSource="{Binding LeaderboardList}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <ViewCell>
+                            <Label Text="{Binding}" 
+                                   VerticalOptions="Center"
+                                   LineBreakMode="NoWrap" 
+                                   Style="{DynamicResource ListItemTextStyle}" 
+                                   FontSize="16" TextColor="white"/>
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+
         </AbsoluteLayout>
         <!--<maps:Map x:Name="RaceMap" WidthRequest="420" HeightRequest="300" IsShowingUser="False" MapType="Hybrid"/>-->
     </ContentPage.Content>

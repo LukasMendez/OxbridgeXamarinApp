@@ -20,9 +20,5 @@ namespace OxbridgeApp.Views
         public MainMenuView() {
             InitializeComponent();
         }
-
-        private void TempButton_Clicked(object sender, EventArgs e) {
-            Console.WriteLine("*** " + Preferences.Get(CurrentUser.Team, null));
-        }
     }
 }
