@@ -47,12 +47,12 @@ namespace OxbridgeApp.Services
 
         public static void RemoveCurrentUser()
         {
-            Preferences.Set(CurrentUser.TokenKey, null);
-            Preferences.Set(CurrentUser.FullName, null);
-            Preferences.Set(CurrentUser.Username, null);
+            Preferences.Set(CurrentUser.TokenKey, "null");
+            Preferences.Set(CurrentUser.FullName, "null");
+            Preferences.Set(CurrentUser.Username, "null");
             Preferences.Set(CurrentUser.IsAdmin, false);
             Preferences.Set(CurrentUser.IsTeamLeader, false);
-            Preferences.Set(CurrentUser.Team, null);
+            Preferences.Set(CurrentUser.Team, "null");
         }
 
     }
