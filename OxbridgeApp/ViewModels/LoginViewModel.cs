@@ -30,8 +30,6 @@ namespace OxbridgeApp.ViewModels
                 {
                     bool success = await App.WebConnection.Login(Username, Password);
                     if (success) {
-                        Console.WriteLine("Type of parameter: " + button.GetType());
-                        Console.WriteLine("");
                         await MoveAnimation((Button)button);
                         Console.WriteLine(Preferences.Get(CurrentUser.TokenKey,"none"));
                         var mainMenuViewModel = ServiceContainer.Resolve<MainMenuViewModel>();
@@ -59,16 +57,11 @@ namespace OxbridgeApp.ViewModels
             await Task.WhenAll(new List<Task> { loginButtonTranslate, loginButtonFade, loginButtonDelay });
         }
 
-        
-
         public void MoveTransformation(Button button) {
             bool runTimer = true;
             int count = 0;
-            double startX = button.TranslationX;
-            double currentX = startX;
             Device.StartTimer(new TimeSpan(0, 0, 0, 0, 10), () =>
             {
-                Console.WriteLine("*** timer");
                 if (runTimer) {
                     if (count < 5) {
                         button.TranslationX += 4;

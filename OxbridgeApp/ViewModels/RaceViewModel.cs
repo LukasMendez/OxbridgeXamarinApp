@@ -34,8 +34,8 @@ namespace OxbridgeApp.ViewModels
         private double Longitude { get; set; }
         public Position MyPosition { get; set; }
         private Pin MyPosPin { get; set; }
-        private List<Circle> CheckPoints { get; set; }
-        private Dictionary<string, Position> Participants { get; set; }
+        public List<Circle> CheckPoints { get; set; }
+        private Dictionary<string, Position> Participants { get; set; } //used to keep track of coordinates of all participants
         private ObservableCollection<string> leaderboardList;
         public ObservableCollection<string> LeaderboardList {
             get { return leaderboardList; }
@@ -45,7 +45,6 @@ namespace OxbridgeApp.ViewModels
         }
 
         private int NextCheckPoint { get; set; }
-        private string UserName { get; set; }
         public Command NorthCommand { get; set; }
         public Command SouthCommand { get; set; }
         public Command EastCommand { get; set; }
