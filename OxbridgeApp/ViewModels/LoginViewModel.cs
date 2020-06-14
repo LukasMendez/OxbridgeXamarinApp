@@ -25,6 +25,8 @@ namespace OxbridgeApp.ViewModels
 
         public LoginViewModel() {
 
+            
+
             this.LoginCommand = new Command(
                 async (object button) =>
                 {

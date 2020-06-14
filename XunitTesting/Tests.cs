@@ -30,77 +30,56 @@ namespace XunitTesting
             Circle circle = new Circle { Tag = 1 };
             Preferences.Set(CurrentUser.Team, team);
             Checkpoint checkpoint = new Checkpoint("checkpoint", team, circle.Tag);
-            var race = new OxbridgeApp.ViewModels.RaceViewModel();
+            var raceVM = new OxbridgeApp.ViewModels.RaceViewModel();
 
             // act
-            race.LeaderboardList.Clear();
+            raceVM.LeaderboardList.Clear();
             App.WebConnection.SendMessage(checkpoint); //telling the server that we completed this checkpoint
-            string actual = race.LeaderboardList[0];
+            string actual = raceVM.LeaderboardList[0];
 
             // assert
             Assert.Equal(team, actual);
         }
 
-        //[Fact]
-        //public void Test1() {
-        //    // arrange
-        //    string expected = "123";
-        //    string actual = "123";
-        //    // assert
-        //    Assert.Equal(expected, actual);
-        //}
+        /// <summary>
+        /// Test if a propertychanged event is fired when a team is added
+        /// </summary>
+        [Fact]
+        public void TestLeaderboardListCollectionPropertyChanged() {
+            // arrange
+            bool invoked = false;
+            string team = "John's Team";
+            var raceVM = new OxbridgeApp.ViewModels.RaceViewModel();
 
-        ///// <summary>
-        ///// Test if a propertychanged event is fired when a car is added
-        ///// </summary>
-        //[Fact]
-        //public void TestCarCollectionPropertyChanged() {
-        //    // arrange
-        //    bool invoked = false;
-        //    var car = new IcomIvalEx.Model.Car() { Brand = "Ford", Price = 100, Model = "Probe" };
-        //    var carDealerVM = new IcomIvalEx.ViewModel.CarDealer();
+            raceVM.PropertyChanged += (sender, e) =>
+            {
+                if (e.PropertyName.Equals("LeaderboardList")) invoked = true;
+            };
 
-        //    carDealerVM.PropertyChanged += (sender, e) =>
-        //    {
-        //        if (e.PropertyName.Equals("InputCar")) invoked = true;
-        //    };
+            // act
+            raceVM.LeaderboardList.Add(team);
 
-        //    // act
-        //    carDealerVM.InputCar = car;
-        //    carDealerVM.AddCar();
+            // assert
+            Assert.True(invoked);
+        }
 
-        //    //    var order = await orderService.GetOrderAsync(1, GlobalSetting.Instance.AuthToken);
-        //    //await orderViewModel.InitializeAsync(order);
-
-        //    // assert
-        //    Assert.True(invoked);
-        //}
-
-        ///// <summary>
-        ///// Test the AddCarCanCMD Command
-        ///// It should only be possible to add up to two cars
-        ///// </summary>
-        ///// <param name="noOfCarsToAdd"></param>
-        ///// <param name="result"></param>
-        //[Theory]
-        //[InlineData(0, true)]
-        //[InlineData(1, true)]
-        //[InlineData(3, false)]
-        //public void CanAddCarCMD(int noOfCarsToAdd, bool result) {
-        //    // arrange
-        //    var car = new IcomIvalEx.Model.Car() { Brand = "Ford", Price = 100, Model = "Probe" };
-        //    var carDealerVM = new IcomIvalEx.ViewModel.CarDealer();
-        //    carDealerVM.InputCar = car;
-
-        //    // act
-        //    for (int i = 0; i < noOfCarsToAdd; i++) {
-        //        carDealerVM.AddCar();
-        //    }
-
-        //    bool canExecuteVal = (carDealerVM.AddCarCanCMD as Command).CanExecute(null);
-
-        //    // assert
-        //    Assert.Equal(result, canExecuteVal);
-    }
+        /// <summary>
+        /// Test the login method
+        /// It should only be possible to login with a valid username and password
+        /// </summary>
+        [Theory]
+        [InlineData("Xunit", "123", true)]
+        [InlineData("Xunit", "1234", false)]
+        [InlineData("Xunit2", "123", false)]
+        public async void CanLogin(string username, string password, bool result) {
+            // arrange
+            var loginVM = new OxbridgeApp.ViewModels.LoginViewModel();
+            loginVM.Username = username;
+            loginVM.Password = password;
+            // act
+            bool loggedIn = await App.WebConnection.Login(loginVM.Username, loginVM.Password);
+            // assert
+            Assert.Equal(result, loggedIn);
+        }
     }
 }

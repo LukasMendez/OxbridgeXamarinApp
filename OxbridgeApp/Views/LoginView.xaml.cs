@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Xamarin.Essentials;
+
 
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -15,26 +17,30 @@ namespace OxbridgeApp.Views
     {
         public LoginView() {
             InitializeComponent();
-            //errorLabel = new Label();
+
+            //OS specific programming
+            if (Device.RuntimePlatform == Device.Android) {
+                Padding = new Thickness(0, 20, 0, 0);
+            }
+
+            //OS specific programming using compiler statements
+            #if __MOBILE__
+            // Xamarin iOS or Android-specific code
+            Padding = new Thickness(0, 20, 0, 0);
+            #endif
+
+            #if __IOS__
+            // iOS-specific code
+            Padding = new Thickness(0, 20, 0, 0);
+            #endif
+
+            #if __ANDROID__
+            // Android-specific code
+            Padding = new Thickness(0, 20, 0, 0);
+            #endif
+
         }
 
-        LoginViewModel loginViewModel = ServiceContainer.Resolve<LoginViewModel>();
 
-        //private async void loginButton_Clicked(object sender, EventArgs e) {
-        //    loginViewModel.VerifyLoginCommand.Execute(this);
-        //    if (errorLabel.Text != null && errorLabel.Text.Equals("OK")) {
-        //        await MoveTransformation();
-        //    } else {
-        //        Console.WriteLine("**** NO LOGIN");
-        //    }
-        //}
-
-        
-        //private async Task MoveTransformation() {
-        //    Task loginButtonTranslate = loginButton.TranslateTo(50, 0, 400, Easing.CubicIn).ContinueWith(x => loginButton.TranslateTo(400, 0, 500, Easing.CubicOut));
-        //    Task loginButtonFade = loginButton.FadeTo(1, 400).ContinueWith(x => loginButton.FadeTo(0, 200));
-        //    await Task.WhenAll(new List<Task> { loginButtonTranslate, loginButtonFade });
-        //    loginViewModel.LoginCommand.Execute(this);
-        //}
     }
 }
