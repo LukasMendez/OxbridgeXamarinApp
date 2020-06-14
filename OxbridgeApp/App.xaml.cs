@@ -4,6 +4,7 @@ using Xamarin.Forms.Xaml;
 using System.Threading.Tasks;
 using OxbridgeApp.ViewModels;
 using OxbridgeApp.Services;
+using Xamarin.Essentials;
 
 [assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 namespace OxbridgeApp
@@ -51,7 +52,23 @@ namespace OxbridgeApp
             // Handle when your app starts
             base.OnStart();
             await InitNavigation();
+            ValidateToken();
             base.OnResume();
+        }
+
+        /// <summary>
+        /// This method will validate the token that we have in our app data to see if its still valid/has expired
+        /// </summary>
+        private async void ValidateToken()
+        {
+            bool isTokenValid = await App.WebConnection.ValidateToken(Preferences.Get(CurrentUser.TokenKey, "null"));
+            if (!isTokenValid)
+            {
+                // Navigate to login if token is invalid
+                var navigationService = ServiceContainer.Resolve<INavigationService>();
+                await navigationService.NavigateToAsync<LoginViewModel>();
+            }
+    
         }
 
         protected override void OnSleep() {

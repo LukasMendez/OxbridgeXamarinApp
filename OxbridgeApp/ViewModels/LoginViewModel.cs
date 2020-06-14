@@ -37,6 +37,8 @@ namespace OxbridgeApp.ViewModels
                         var mainMenuViewModel = ServiceContainer.Resolve<MainMenuViewModel>();
                         mainMenuViewModel.UserText = "Welcome " + Preferences.Get(CurrentUser.Username, null) + " (" + Preferences.Get(CurrentUser.Team, null) + ")";
                         mainMenuViewModel.RaceButtonText = "Enter Race";
+                        mainMenuViewModel.RaceInformationLabel = "Select a race from the list to join it! (You will only be allowed to enter, if you are signed up for that race)";
+                        mainMenuViewModel.IsSpectator = false;
 
                         var masterDetailViewModel = ServiceContainer.Resolve<MasterDetailViewModel>();
                         // If the MasterMenuItem 'Login' was visible before. It will be hidden as the user is now logged in
