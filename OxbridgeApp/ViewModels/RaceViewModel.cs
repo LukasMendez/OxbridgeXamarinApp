@@ -67,6 +67,9 @@ namespace OxbridgeApp.ViewModels
 
 
         public RaceViewModel() {
+
+            mainMenuViewModel = ServiceContainer.Resolve<MainMenuViewModel>();
+
             Participants = new Dictionary<string, Position>();
             LeaderboardList = new ObservableCollection<string>();
             this.MyMap = new Map();
@@ -90,14 +93,6 @@ namespace OxbridgeApp.ViewModels
                 MapSpan.FromCenterAndRadius(
                 MyPosition, Distance.FromKilometers(1)));
 
-            MyPosPin = new Pin
-            {
-                Label = "initial",
-                Type = PinType.Place,
-                Position = new Position(Latitude, Longitude),
-                Icon = boatPin
-            };
-            MyMap.Pins.Add(MyPosPin);
 
             this.NorthCommand = new Command(
                 (object message) =>
@@ -142,7 +137,26 @@ namespace OxbridgeApp.ViewModels
         }
         MainMenuViewModel mainMenuViewModel;
         private void Appearing() {
-            mainMenuViewModel = ServiceContainer.Resolve<MainMenuViewModel>();
+
+            // Will only show your boat/pin on the map if you are NOT a spectator
+            if (!mainMenuViewModel.IsSpectator)
+            {
+                MyMap.Pins.Clear();
+                MyPosPin = new Pin
+                {
+                    Label = "initial",
+                    Type = PinType.Place,
+                    Position = new Position(Latitude, Longitude),
+                    Icon = boatPin
+                };
+                MyMap.Pins.Add(MyPosPin);
+
+            } else
+            {
+                // If you have been logged in as Team Leader and then want to only spectate, we need to remove the previous pin
+                MyMap.Pins.Clear();
+            }
+
             //this.MyMap = new Map();
             //this.MyMap.MapType = MapType.Hybrid;
             //runTimer = true; //should be set from callback from emit.startRace from server

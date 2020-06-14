@@ -11,7 +11,7 @@ namespace OxbridgeApp.ViewModels
 {
     public abstract class BaseViewModel : ExtendedBindableObject
     {
-        protected readonly INavigationService NavigationService;
+        public readonly INavigationService NavigationService;
 
         internal static string UserName = "";
 

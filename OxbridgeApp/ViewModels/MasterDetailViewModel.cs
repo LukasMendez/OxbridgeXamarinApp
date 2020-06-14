@@ -87,6 +87,8 @@ namespace OxbridgeApp.ViewModels
 
             mainMenuViewModel.UserText = "Welcome Spectator";
             mainMenuViewModel.RaceButtonText = "Spectate";
+            mainMenuViewModel.RaceInformationLabel = "Select a race from the list you would like to spectate";
+            mainMenuViewModel.IsSpectator = true;
         }
 
         public void SwitchLoginState()

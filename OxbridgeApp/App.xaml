@@ -7,6 +7,7 @@
 
             <!-- COLORS -->
             <Color x:Key="WhiteColor">#ffffff</Color>
+            <Color x:Key="LightBlue">#D4EFEC</Color>
             <Color x:Key="BlackColor">#000000</Color>
             <Color x:Key="BackgroundColor">#F4F6FA</Color>
             <Color x:Key="DarkRedColor">#B33014</Color>

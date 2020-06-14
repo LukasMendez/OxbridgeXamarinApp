@@ -38,6 +38,14 @@ namespace OxbridgeApp.ViewModels
         }
         public bool IsSpectator { get; set; }
 
+        private string raceInformationLabel;
+        public string RaceInformationLabel
+        {
+            get { return raceInformationLabel; }
+            set {
+                raceInformationLabel = value;
+                this.OnPropertyChanged(); }
+        }
 
 
         public MainMenuViewModel() {
@@ -46,10 +54,12 @@ namespace OxbridgeApp.ViewModels
             if (Preferences.Get(CurrentUser.Username.ToString(), null) != null && Preferences.Get(CurrentUser.Username.ToString(), null) != "usernameKey") {
                 UserText = "Welcome " + Preferences.Get(CurrentUser.Username, null) + " (" + Preferences.Get(CurrentUser.Team, null) + ")";
                 RaceButtonText = "Enter race";
+                RaceInformationLabel = "Select a race from the list to join it! (You will only be allowed to enter, if you are signed up for that race)";
                 IsSpectator = false;
             } else {
                 UserText = "Welcome Spectator";
                 RaceButtonText = "Spectate";
+                RaceInformationLabel = "Select a race from the list you would like to spectate";
                 IsSpectator = true;
             }
 
