@@ -94,7 +94,7 @@ namespace OxbridgeApp.ViewModels
         public void SwitchLoginState()
         {
             //making sure we actually know if we are logged in
-            if(Preferences.Get(CurrentUser.TokenKey, null) != null) { //if has token
+            if(!Preferences.Get(CurrentUser.TokenKey, "").Equals(String.Empty)) { //if has token
                 CurrentUser.IsLoggedIn = true;
             } else {
                 CurrentUser.IsLoggedIn = false;
