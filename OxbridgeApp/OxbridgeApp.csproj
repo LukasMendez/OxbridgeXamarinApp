@@ -8,6 +8,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DebugType>portable</DebugType>
     <DebugSymbols>true</DebugSymbols>
+    <DefineConstants>TRACE;__MOBILE__, __IOS__, __ANDROID__</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>

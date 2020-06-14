@@ -76,7 +76,6 @@ namespace OxbridgeApp.ViewModels
                             } else {
                                 await Application.Current.MainPage.DisplayAlert("Access denied", "Your team is not assigned to participate in this race", "Ok");
                             }
-                            //Console.WriteLine("*Spectate*");
                         } else {
                             await NavigationService.NavigateToAsyncWithBack<RaceViewModel>();
                         }
