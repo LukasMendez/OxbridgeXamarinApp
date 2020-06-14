@@ -65,11 +65,8 @@ namespace OxbridgeApp.ViewModels
         // Boat image
         private BitmapDescriptor boatPin = BitmapDescriptorFactory.FromBundle("boatSmall.png");
 
-
         public RaceViewModel() {
-
             mainMenuViewModel = ServiceContainer.Resolve<MainMenuViewModel>();
-
             Participants = new Dictionary<string, Position>();
             LeaderboardList = new ObservableCollection<string>();
             this.MyMap = new Map();
@@ -92,7 +89,6 @@ namespace OxbridgeApp.ViewModels
             MyMap.MoveToRegion(
                 MapSpan.FromCenterAndRadius(
                 MyPosition, Distance.FromKilometers(1)));
-
 
             this.NorthCommand = new Command(
                 (object message) =>
@@ -136,8 +132,11 @@ namespace OxbridgeApp.ViewModels
                 (object message) => { Console.WriteLine("*CanWest*"); return true; });
         }
         MainMenuViewModel mainMenuViewModel;
-        private void Appearing() {
 
+        /// <summary>
+        /// Fired by Command attached to behavior attached to event "Appearing" which is called everytime the page is made visible/appears.
+        /// </summary>
+        private void Appearing() {
             // Will only show your boat/pin on the map if you are NOT a spectator
             if (!mainMenuViewModel.IsSpectator)
             {
@@ -150,16 +149,12 @@ namespace OxbridgeApp.ViewModels
                     Icon = boatPin
                 };
                 MyMap.Pins.Add(MyPosPin);
-
             } else
             {
                 // If you have been logged in as Team Leader and then want to only spectate, we need to remove the previous pin
                 MyMap.Pins.Clear();
             }
 
-            //this.MyMap = new Map();
-            //this.MyMap.MapType = MapType.Hybrid;
-            //runTimer = true; //should be set from callback from emit.startRace from server
             LoadCheckPoints();
             if (!mainMenuViewModel.IsSpectator) {
                 StartCoordinateTimer();
@@ -169,6 +164,9 @@ namespace OxbridgeApp.ViewModels
             }
         }
 
+        /// <summary>
+        /// Fired by Command attached to behavior attached to event "Disappearing" which is called everytime the page is no longer visible/disappears.
+        /// </summary>
         private void Disappearing() {
             //App.WebConnection.DisconnectSocket();
             runTimer = false;
@@ -176,6 +174,10 @@ namespace OxbridgeApp.ViewModels
         }
 
         bool runTimer = false;
+        /// <summary>
+        /// Starting a timer that updates this users map with pins locally and sends its own 
+        /// coordinates to the server every tick until stopped by "Disappearing" event/runTimer bool.
+        /// </summary>
         public void StartCoordinateTimer() {
             Device.StartTimer(new TimeSpan(0, 0, 1), () =>
             {
@@ -191,6 +193,9 @@ namespace OxbridgeApp.ViewModels
         }
 
         bool first = true; //only move the map one time
+        /// <summary>
+        /// Getting GPS information from device and using it to set current position
+        /// </summary>
         private async void UpdatePositionFromGPS() {
             var request = new Xamarin.Essentials.GeolocationRequest(Xamarin.Essentials.GeolocationAccuracy.Medium);
             var location = await Xamarin.Essentials.Geolocation.GetLocationAsync(request);
@@ -207,9 +212,13 @@ namespace OxbridgeApp.ViewModels
             }
         }
 
+        /// <summary>
+        /// Updating pins on the map by iterating Participants and drawing their locations.
+        /// Also sending own coordinates to server.
+        /// </summary>
         public void UpdateAllPins() {
-            //send coordinates
             if (!mainMenuViewModel.IsSpectator) {
+                //Send current coordinates
                 App.WebConnection.SendMessage(new Coordinate("coordinate", Preferences.Get(CurrentUser.Team, null), new Position(Latitude, Longitude)));
             }
 
@@ -243,6 +252,9 @@ namespace OxbridgeApp.ViewModels
             }
         }
 
+        /// <summary>
+        /// Getting checkpoints from SelectedRace property and drawing them as Circle objects on the map
+        /// </summary>
         private void LoadCheckPoints() {
             var viewModel = ServiceContainer.Resolve<MainMenuViewModel>();
             var selectedRace = viewModel.SelectedRace;
@@ -262,6 +274,10 @@ namespace OxbridgeApp.ViewModels
             }
         }
 
+        /// <summary>
+        /// Updating the checkpoints so the next in line is blue and completed ones are green and tagged as "done".
+        /// Also sending "checkpoint" message to server to indicate that the leaderboard should be updated.
+        /// </summary>
         private void UpdateCheckPoints() {
             foreach (var item in CheckPoints) {
                 if (item.Tag.ToString().Equals(NextCheckPoint.ToString())) { //if this checkpoint is the next
@@ -285,6 +301,7 @@ namespace OxbridgeApp.ViewModels
         }
 
         /// <summary>
+        /// Receiving a coordinate message from server and updating/adding it to Participants collection
         /// fired by event every time any client emits its coordinate
         /// </summary>
         /// <param name="obj"></param>
@@ -295,6 +312,7 @@ namespace OxbridgeApp.ViewModels
         }
 
         /// <summary>
+        /// Starting the timer for sending coordinates when startrace message is received from server
         /// fired by event when server emits "startrace"
         /// </summary>
         /// <param name="obj"></param>
@@ -306,6 +324,7 @@ namespace OxbridgeApp.ViewModels
         }
 
         /// <summary>
+        /// Updating the current leaderboard collection with the one received from server
         /// fired by event when server emits "checkpoint"
         /// </summary>
         /// <param name="obj"></param>
@@ -314,7 +333,6 @@ namespace OxbridgeApp.ViewModels
             SortedLeaderboard sortedLeaderboard = JsonConvert.DeserializeObject<SortedLeaderboard>(message);
             LeaderboardList.Clear();
             for (int i = 0; i < sortedLeaderboard.Leaderboard.Count; i++) {
-                //LeaderboardList.Add(i + 1, sortedLeaderboard.Leaderboard[i].TeamName);
                 LeaderboardList.Add(i+1 + " " + sortedLeaderboard.Leaderboard[i].TeamName);
             }
         }
