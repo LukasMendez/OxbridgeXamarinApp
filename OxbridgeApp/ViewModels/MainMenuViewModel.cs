@@ -49,8 +49,7 @@ namespace OxbridgeApp.ViewModels
 
 
         public MainMenuViewModel() {
-            //Preferences.Get(CurrentUser.IsLoggedIn.ToString(), null) == null || Preferences.Get(CurrentUser.IsLoggedIn.ToString(), null).Equals("False")
-            string test = Preferences.Get(CurrentUser.IsLoggedIn.ToString(), null);
+            //setting up info labels based on being logged in or not
             if (Preferences.Get(CurrentUser.Username.ToString(), null) != null && Preferences.Get(CurrentUser.Username.ToString(), null) != "usernameKey") {
                 UserText = "Welcome " + Preferences.Get(CurrentUser.Username, null) + " (" + Preferences.Get(CurrentUser.Team, null) + ")";
                 RaceButtonText = "Enter race";
@@ -87,14 +86,22 @@ namespace OxbridgeApp.ViewModels
 
             UpdateRaceList();
             Console.WriteLine();
-
         }
 
+        /// <summary>
+        /// Fired by ItemSelectedCommand attached to ItemSelected event in the race listview.
+        /// Used to get a reference to which race the user selected on the list.
+        /// </summary>
+        /// <param name="race"></param>
         void SelectRace(Race race) {
             Console.WriteLine("selectedItem: " + race.StartTime + " " + race.LocationDescription);
             SelectedRace = race;
         }
 
+        /// <summary>
+        /// updating the List with databinding to the race listview
+        /// iterating to fire OnPropertyChanged
+        /// </summary>
         private async void UpdateRaceList() {
             ObservableCollection<Race> temp;
             temp = await GetRaces();
@@ -107,6 +114,10 @@ namespace OxbridgeApp.ViewModels
             }
         }
 
+        /// <summary>
+        /// fetching races from server
+        /// </summary>
+        /// <returns></returns>
         private async Task<ObservableCollection<Race>> GetRaces() {
             return await App.WebConnection.GetRaces();
         }

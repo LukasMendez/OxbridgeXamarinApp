@@ -13,7 +13,6 @@ namespace OxbridgeApp.ViewModels
 {
     class MasterDetailViewModel : BaseViewModel
     {
-
         private MainMenuViewModel mainMenuViewModel;
         private bool isPresented = false;
         public bool IsPresented {
@@ -25,7 +24,6 @@ namespace OxbridgeApp.ViewModels
             {
                 isPresented = value; this.OnPropertyChanged();
             }
-
         }
 
         public ObservableCollection<MasterMenuItem> MasterMenuItems { get; set; }
@@ -81,6 +79,9 @@ namespace OxbridgeApp.ViewModels
             await NavigationService.NavigateToAsync(item.TargetViewModel);
         }
 
+        /// <summary>
+        /// logging out the current user and updating the UI
+        /// </summary>
         private void SignOut() {
             CurrentUser.RemoveCurrentUser();
             SwitchLoginState();
@@ -91,6 +92,9 @@ namespace OxbridgeApp.ViewModels
             mainMenuViewModel.IsSpectator = true;
         }
 
+        /// <summary>
+        /// A toggle for keeping track of logging in/out and updating the Master menu accordingly
+        /// </summary>
         public void SwitchLoginState()
         {
             //making sure we actually know if we are logged in

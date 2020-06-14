@@ -13,13 +13,6 @@ namespace OxbridgeApp.Services
     class NavigationService : INavigationService {
         private readonly ISettingsService _settingsService;
 
-        //Dictionary to store instances of Pages/Views so they dont have to be newed again to be used
-        //private Dictionary<string, Page> existingPages;
-        //public Dictionary<string, Page> ExistingPages {
-        //    get { return existingPages; }
-        //    set { existingPages = value; }
-        //}
-
         public BaseViewModel PreviousPageViewModel {
             get {
                 var mainPage = Application.Current.MainPage as CustomNavigationPage;
@@ -29,20 +22,11 @@ namespace OxbridgeApp.Services
         }
 
         public NavigationService(ISettingsService settingsService) {
-            //if (ExistingPages == null) {
-            //    ExistingPages = new Dictionary<string, Page>();
-            //}
             _settingsService = settingsService;
         }
 
         public Task InitializeAsync() {
-            //return NavigateToAsync<UserNameViewModel>();
             return NavigateToAsync<MainMenuViewModel>();//The startpage
-
-            //if (string.IsNullOrEmpty(_settingsService.AuthAccessToken))
-            //return NavigateToAsync<MenuViewModel>();
-            //else
-            //  return NavigateToAsync<MenuViewModel>();
         }
 
         public Task NavigateToAsync<TViewModel>() where TViewModel : BaseViewModel {
@@ -150,17 +134,6 @@ namespace OxbridgeApp.Services
 
             Page page = Activator.CreateInstance(pageType) as Page;
             return page;
-            //if (page.ToString().Equals("OxbridgeApp.Views.RaceView")) {
-            //    ExistingPages.Remove(page.ToString());
-            //}
-            //if (!ExistingPages.ContainsKey(page.ToString())) //Only add to dictionary if not exists
-            //{
-            //    ExistingPages.Add(page.ToString(), page);
-            //    return page; //if not exists return new page
-            //} else {
-            //    Console.WriteLine("******** " + page.ToString());
-            //    return ExistingPages[page.ToString()]; //if exists return existing page
-            //}
         }
     }
 }

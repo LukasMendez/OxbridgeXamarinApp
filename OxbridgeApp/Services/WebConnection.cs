@@ -24,9 +24,6 @@ namespace OxbridgeApp.Services
 
         public Socket socket { get; set; }
 
-        //public event MessageReceivedHandler NewMessageReceived;
-        //public event ConnectionHandler ConnectedEvent;
-
         public event MessageReceivedHandler NewCoordReceived;
         public event MessageReceivedHandler StartRaceReceived;
         public event MessageReceivedHandler LeaderboardReceived;
@@ -34,11 +31,7 @@ namespace OxbridgeApp.Services
         public WebConnection()
         {
 
-
-
         }
-
-
 
         /// <summary>
         /// opening a socket for handling race-related communication
@@ -50,18 +43,8 @@ namespace OxbridgeApp.Services
                 Connected = true;
                 socket.On("race", (data) =>
                 {
-                    //var settings = new JsonSerializerSettings();
-                    //settings.Converters.Add(new MessageConverter());
-
                     IMessage message = JsonConvert.DeserializeObject<Message>(data.ToString());
                     Console.WriteLine(message.Header);
-
-                    //IMessage message = JsonConvert.DeserializeObject<Message>(data.ToString(), new JsonSerializerSettings
-                    //{
-                    //    TypeNameHandling = TypeNameHandling.Auto,
-                    //    NullValueHandling = NullValueHandling.Ignore,
-
-                    //});
 
                     if (message.Header.Equals("coordinate")) { //receiving coordinates from all boats
                         //Console.WriteLine("Received from server: " + data);
@@ -105,7 +88,6 @@ namespace OxbridgeApp.Services
         /// <param name="coordinate"></param>
         public void SendMessage(Coordinate coordinate) {
             if(socket != null) {
-                
                 string jsonCoordinate = JsonConvert.SerializeObject(coordinate);
                 socket.Emit("race", jsonCoordinate);
             }
@@ -121,6 +103,11 @@ namespace OxbridgeApp.Services
                 socket.Emit("race", jsonCheckpoint);
             }
         }
+
+        /// <summary>
+        /// used for sending a custom object as a message to the server
+        /// </summary>
+        /// <param name="obj"></param>
         public void SendMessage(Object obj) {
             if (socket != null) {
                 string jsonObj = JsonConvert.SerializeObject(obj);
@@ -128,13 +115,6 @@ namespace OxbridgeApp.Services
             }
         }
 
-        public void SendHiTest() {
-            if (socket != null) {
-                socket.Emit("race", "hello");
-            }
-        }
-
-        
         /// <summary>
         /// This method will retrieve a list of upcoming races. It doesn't require a token, as anonymous users can also
         /// see this kind of information. 
@@ -144,10 +124,6 @@ namespace OxbridgeApp.Services
         {
             using (var httpClient = new HttpClient { BaseAddress = new Uri(Constants.HostName) })
             {
-                //httpClient.DefaultRequestHeaders.Authorization =
-                //new AuthenticationHeaderValue("Bearer", Preferences.Get(GlobalKeys.TokenKey, "null"));
-
-
                 try {
                     var response = await httpClient.GetStringAsync("races").ConfigureAwait(false);
                     return JsonConvert.DeserializeObject<ObservableCollection<Race>>(response.ToString());
@@ -159,6 +135,12 @@ namespace OxbridgeApp.Services
             }
         }
 
+        /// <summary>
+        /// Send login request to server and set IsLoggedIn property of CurrentUser accordingly 
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="password"></param>
+        /// <returns> bool to indicate success </returns>
         public async Task<bool> Login(string username, string password) {
             using (var httpClient = new HttpClient { BaseAddress = new Uri(Constants.HostName) }) {
                 var user = new { username, password };
@@ -168,7 +150,6 @@ namespace OxbridgeApp.Services
 
                 try {
                     var response = await httpClient.SendAsync(request);
-
                     if (response.StatusCode == HttpStatusCode.Created) {
                         string body = await response.Content.ReadAsStringAsync();
                         JObject jObj = JObject.Parse(body);
@@ -183,7 +164,6 @@ namespace OxbridgeApp.Services
                             // We store these preferences for later use
                             CurrentUser.SetCurrentUser(tokenValue, fullNameValue, usernameValue, isAdminValue, isTeamLeaderValue, teamValue);
                             CurrentUser.IsLoggedIn = true;
-
                             return true;
                         }
                     }
@@ -197,6 +177,11 @@ namespace OxbridgeApp.Services
             }
         }
 
+        /// <summary>
+        /// Used for requesting to join a race when logged in. Refuses a user whos team is not assigned to this raceID
+        /// </summary>
+        /// <param name="raceID"></param>
+        /// <returns> bool to indicate access to this raceID </returns>
         public async Task<bool> JoinRace(int raceID) {
             using (var httpClient = new HttpClient { BaseAddress = new Uri(Constants.HostName) }) {
                 httpClient.DefaultRequestHeaders.Authorization =
@@ -230,7 +215,11 @@ namespace OxbridgeApp.Services
             }
         }
 
-
+        /// <summary>
+        /// Checks if the token of CurrentUser is still valid. Used to logout user if token is invalid.
+        /// </summary>
+        /// <param name="token"></param>
+        /// <returns></returns>
         public async Task<bool> ValidateToken(string token)
         {
             using (var httpClient = new HttpClient { BaseAddress = new Uri(Constants.HostName) })
@@ -240,14 +229,9 @@ namespace OxbridgeApp.Services
                     // Authorization
                     httpClient.DefaultRequestHeaders.Authorization =
                     new AuthenticationHeaderValue("Bearer", token);
-
-                    // var response = await client.PostAsync(address, new StringContent(content, Encoding.UTF8, "application/json"));
                     var response = await httpClient.GetAsync("/authentication/validateToken");
-
                     string body = await response.Content.ReadAsStringAsync();
                     Console.WriteLine(body);
-
-
                     JObject jObj = JObject.Parse(body);
                     Console.WriteLine("Was parsing the body to a JObject successful: " + jObj != null);
                     if (jObj != null)
@@ -267,21 +251,6 @@ namespace OxbridgeApp.Services
                 return false;
             }
         }
-
-
-
-
-
-
-
-        //public static async Task<ObservableCollection<Race>> GetRace(int raceNo) {
-        //    using (var httpClient = new HttpClient { BaseAddress = new Uri(Constants.HostName) }) {
-        //        var response = await httpClient.GetStringAsync("races/" + raceNo).ConfigureAwait(false);
-        //        return JsonConvert.DeserializeObject<ObservableCollection<Race>>(response.ToString());
-        //    }
-        //}
-
-
     }
 }
 

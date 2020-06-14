@@ -14,7 +14,6 @@ namespace OxbridgeApp.ViewModels
         public string Username { get; set; }
         public string Password { get; set; }
         private string errorMessage;
-
         public string ErrorMessage {
             get { return errorMessage; }
             set { errorMessage = value;
@@ -24,9 +23,6 @@ namespace OxbridgeApp.ViewModels
         public Command LoginCommand { get; set; }
 
         public LoginViewModel() {
-
-            
-
             this.LoginCommand = new Command(
                 async (object button) =>
                 {
@@ -39,12 +35,10 @@ namespace OxbridgeApp.ViewModels
                         mainMenuViewModel.RaceButtonText = "Enter Race";
                         mainMenuViewModel.RaceInformationLabel = "Select a race from the list to join it! (You will only be allowed to enter, if you are signed up for that race)";
                         mainMenuViewModel.IsSpectator = false;
-
                         var masterDetailViewModel = ServiceContainer.Resolve<MasterDetailViewModel>();
                         // If the MasterMenuItem 'Login' was visible before. It will be hidden as the user is now logged in
                         // This will add a 'Sign-out' button instead
                         masterDetailViewModel.SwitchLoginState();
-
                         await NavigationService.NavigateToAsync<MainMenuViewModel>();
                     } else {
                         MoveTransformation((Button)button);
@@ -54,6 +48,11 @@ namespace OxbridgeApp.ViewModels
                 (object message) => { Console.WriteLine("*CanLogin*"); return true; });
         }
 
+        /// <summary>
+        /// creating an animated effect for a button using Animations
+        /// </summary>
+        /// <param name="button"></param>
+        /// <returns></returns>
         private async Task MoveAnimation(Button button) {
             Task loginButtonTranslate = button.TranslateTo(50, 0, 400, Easing.CubicIn).ContinueWith(x => button.TranslateTo(400, 0, 500, Easing.CubicOut));
             Task loginButtonFade = button.FadeTo(1, 400).ContinueWith(x => button.FadeTo(0, 200));
@@ -61,6 +60,10 @@ namespace OxbridgeApp.ViewModels
             await Task.WhenAll(new List<Task> { loginButtonTranslate, loginButtonFade, loginButtonDelay });
         }
 
+        /// <summary>
+        /// creating an animated effect for a button using Transformations
+        /// </summary>
+        /// <param name="button"></param>
         public void MoveTransformation(Button button) {
             bool runTimer = true;
             int count = 0;

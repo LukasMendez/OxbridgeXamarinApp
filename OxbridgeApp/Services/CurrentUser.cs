@@ -27,7 +27,7 @@ namespace OxbridgeApp.Services
 
 
         /// <summary>
-        /// Easy method for configure the current user, that is logged into the system. 
+        /// Configure the current user, that is logged into the system. 
         /// </summary>
         /// <param name="token"></param>
         /// <param name="fullname"></param>
@@ -45,6 +45,9 @@ namespace OxbridgeApp.Services
             Preferences.Set(CurrentUser.Team, team);
         }
 
+        /// <summary>
+        /// Remove the current user, that is logged into the system.
+        /// </summary>
         public static void RemoveCurrentUser()
         {
             Preferences.Set(CurrentUser.TokenKey, "");
